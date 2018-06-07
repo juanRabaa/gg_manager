@@ -1,0 +1,15 @@
+<div class="row product-local-image-holder {{class}}" ng-class="dragPosition">
+    <div ng-if="" class="drop-placeholder"></div>
+    <label>{{label}}</label>
+    <div class="wp-gallery-trigger">
+        <input hidden ng-model="ngModel" class="wp-gallery-image-input">
+        <div class="wp-gallery-current-image">
+            <img ng-if="!ngModel"class="responsive-img" src="{{placeholder}}">
+            <img ng-if="ngModel" class="responsive-img" src="{{ngModel}}">
+            <span ng-if="!ngModel && !placeholder" class="simple-placeholder" src="{{ngModel}}">Seleccione una imagen</span>
+        </div>
+        <div ng-if="!disabled" ng-click="openGallery()" class="wp-gallery-open-button gg-green-background btn waves-effect waves-light">
+            <span>{{button}}</span>
+        </div>
+    </div>
+</div>
