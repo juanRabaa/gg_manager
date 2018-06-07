@@ -103,6 +103,7 @@ class GG_Database_Manager{
 	const db_prefix = 'gg_';
 	const products_table = (self::db_prefix) . 'products';
     const fpages_products_table = (self::db_prefix) . 'fpages_products';
+    const pages_table = (self::db_prefix) . 'pages';
 
 	public static function wpdb_products_table(){
 		return (self::wpdb_prefix()) . (self::products_table);
@@ -110,6 +111,10 @@ class GG_Database_Manager{
 
     public static function wpdb_fpages_products_table(){
 		return (self::wpdb_prefix()) . (self::fpages_products_table);
+	}
+
+    public static function wpdb_pages_table(){
+		return (self::wpdb_prefix()) . (self::pages_table);
 	}
 
 	public static function wpdb_prefix(){
@@ -120,6 +125,9 @@ class GG_Database_Manager{
 	// =============================================================================
 	// DB MANIPULATION
 	// =============================================================================
+    // =========================================================================
+    // PRODUCTS
+    // =========================================================================
 	public function add_product( WP_REST_Request $request ) {
 		global $wpdb;
 		$product_data = array(
@@ -205,6 +213,44 @@ class GG_Database_Manager{
 		$wpdb->insert(self::wpdb_fpages_products_table(), $product_page_rel_data, array('%s','%s','%s','%s','%s','%d','%d','%d','%d'));
 		return $wpdb;
 	}
+
+    // =============================================================================
+    // PAGES
+    // =============================================================================
+
+    public function get_pages( $data ) {
+		global $wpdb;
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' ORDER BY name');
+	}
+
+    public function get_base_page( $data ) {
+		global $wpdb;
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE page_type="base_page" LIMIT 1');
+	}
+
+    public function add_page( WP_REST_Request $request ) {
+		global $wpdb;
+		$page_data = array(
+			'ID'   			 	=> $request['ID'],
+			'name'    			=> $request['name'],
+			'description'    	=> $request['description'],
+			'buttons_type'    	=> $request['buttons_type'],
+			'page_type'    		=> $request['page_type'],
+			'image'	             => $request['image'],
+			'visibility'    	=> 1,
+            'position'    		=> $request['position'],
+            'parent_ID'    		=> $request['parent_ID'],
+		);
+
+		$wpdb->insert(self::wpdb_pages_table(), $page_data, array('%s','%s','%s','%s','%s','%s','%d','%d','%s'));
+		return $wpdb;
+	}
+
+    public function delete_page( WP_REST_Request $request ) {
+        global $wpdb;
+		$wpdb->delete(self::wpdb_pages_table(), array('ID' => $request['ID']), array( '%s' ));
+		return $wpdb;
+	}
 }
 
 /** Step 2 (from text above). */
@@ -248,90 +294,36 @@ function my_plugin_options() {
 	wp_enqueue_script( 'panel-productos-app', get_template_directory_uri()."/page-creator/app/app.js", true );
 	wp_enqueue_script( 'angular-ui-sortable', get_template_directory_uri()."/page-creator/app/bower_components/angular-ui-sortable/sortable.min.js", true );
 	wp_enqueue_script( "angular-autocomplete-alt", get_template_directory_uri()."/page-creator/app/bower_components/angucomplete-alt/dist/angucomplete-alt.min.js", true );
-	//Controllers
+    wp_enqueue_script( "angular-animate", get_template_directory_uri()."/page-creator/app/bower_components/angular-animate/angular-animate.min.js", true );
+    // ============================================================================
+    // CONTROLLERS
+    // ============================================================================
+    wp_enqueue_script( "generalController", get_template_directory_uri()."/page-creator/app/controllers/generalController.js", true );
 	wp_enqueue_script( "initialController", get_template_directory_uri()."/page-creator/app/controllers/initialController.js", true );
 	wp_enqueue_script( "productsManagmentController", get_template_directory_uri()."/page-creator/app/controllers/productsManagment.js", true );
 	//Angular bootstrap
 	wp_enqueue_script( "angular-bootstrap", get_template_directory_uri()."/page-creator/app/js/angular-bootstrap.js", true );
 	//include( get_template_directory_uri().'/page-creator/page-creator.php' );
 
-
-
     get_template_part('page-creator/page', 'creator');
 }
 
 // =============================================================================
-// REST API
-// =============================================================================
-
-function my_awesome_func( WP_REST_Request $request ) {
-  // You can access parameters via direct array access on the object:
-  $param = $request['some_param'];
-
-  // Or via the helper method:
-  $param = $request->get_param( 'some_param' );
-
-  // You can get the combined, merged set of parameters:
-  $parameters = $request->get_params();
-
-  // The individual sets of parameters are also available, if needed:
-  $parameters = $request->get_url_params();
-  $parameters = $request->get_query_params();
-  $parameters = $request->get_body_params();
-  $parameters = $request->get_json_params();
-  $parameters = $request->get_default_params();
-
-  // Uploads aren't merged in, but can be accessed separately:
-  $parameters = $request->get_file_params();
-
-  return $request['name'];
-}
-
-function add_product( WP_REST_Request $request ) {
-	global $wpdb;
-
-	$wpdb->insert(
-		$wpdb->prefix . $gg_db_prefix . 'products',
-		array(
-			'ID'   			 	=> $request['ID'],
-			'name'    			=> $request['name'],
-			'description'    	=> $request['description'],
-			'price'    			=> $request['price'],
-			'image'    			=> $request['image'],
-			'parent_product_ID'	=> $request['parent_product_ID'],
-			'enabled'    		=> 1,
-		),
-		array(
-			'%s',
-			'%s',
-			'%s',
-			'%f',
-			'%s',
-			'%s',
-			'%d',
-		)
-	);
-	return $wpdb;
-}
-
-add_action( 'rest_api_init', function () {
-  register_rest_route( 'gg/v1', '/author', array(
-    'methods' => 'POST',
-    'callback' => 'my_awesome_func',
-  ) );
-});
-
-// =============================================================================
-// PRODUCTS
+// ROUTES
 // =============================================================================
 
 WP_Rest_API_Extended::get('gg/v1', '/products/get/all', array( 'GG_Database_Manager', 'get_products' ));
 WP_Rest_API_Extended::get('gg/v1', '/products/get/id/(?P<id>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_product_by_ID' ));
+
+WP_Rest_API_Extended::get('gg/v1', '/pages/get/all', array( 'GG_Database_Manager', 'get_pages' ));
+WP_Rest_API_Extended::get('gg/v1', '/pages/get/base_page', array( 'GG_Database_Manager', 'get_base_page' ));
 
 WP_Rest_API_Extended::authentication_group( function(){
     WP_Rest_API_Extended::post('gg/v1', '/fpages/add_product', array( 'GG_Database_Manager', 'add_product_to_page' ));
     WP_Rest_API_Extended::post('gg/v1', '/products/add', array( 'GG_Database_Manager', 'add_product' ));
     WP_Rest_API_Extended::post('gg/v1', '/products/delete', array( 'GG_Database_Manager', 'delete_product' ));
     WP_Rest_API_Extended::post('gg/v1', '/products/edit', array( 'GG_Database_Manager', 'edit_product' ));
+
+    WP_Rest_API_Extended::post('gg/v1', '/pages/add', array( 'GG_Database_Manager', 'add_page' ));
 });
 ?>

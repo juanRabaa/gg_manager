@@ -2,6 +2,10 @@
     z-index: 2;
 }
 
+.ng-cloak {
+    display: none !important;
+}
+
 .modal-header{
     position: absolute;
     right: 1rem;
@@ -649,6 +653,115 @@ i.hover-tilt:hover:before {
     opacity: 0.1;
 }
 
+/* ========================================================================== */
+/* Loading */
+/* ========================================================================== */
+.loading-animation .loading-done {
+    color: #8ed85f;
+    font-weight: bold;
+}
+
+.loading-animation{
+	position:  fixed;
+	width:  100%;
+	height:  100%;
+	display:  flex;
+	align-items:  center;
+	justify-content:  center;
+	top: 0;
+	left:  0;
+	z-index: 3;
+	background-color: white;
+}
+
+.loading-data {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    height: 1.4rem;
+    position: relative;
+    bottom: 0;
+    overflow: hidden;
+    transition: all 0.4s;
+}
+
+.loading-data.complete{
+    height: 0;
+}
+
+.loading-error .general-loading {
+    font-weight:  bold;
+    color: #d93f3f;
+}
+
+.loading-animation .loading-background-overlay {
+    background-color: #ffffff;
+    height:  100%;
+    width:  100%;
+    position:  absolute;
+    top: 0;
+    left:  0;
+    transition:  all 0.4s;
+    opacity: 0;
+}
+
+.loading-animation .loading-error {
+    z-index: 2;
+}
+
+.loading-animation.error-ocurred .loading-background-overlay {
+    opacity:  1;
+}
+
+.loading-animation .loading-error .loading-button{
+    display: block;
+}
+
+/* ngIf animation */
+.ng-if-fade.ng-enter,
+.ng-if-fade.ng-leave {
+  -webkit-transition: opacity ease-in-out 2s;
+  -moz-transition: opacity ease-in-out 2s;
+  -ms-transition: opacity ease-in-out 2s;
+  -o-transition: opacity ease-in-out 2s;
+  transition: opacity ease-in-out 2s;
+}
+.ng-if-fade.ng-enter,
+.ng-if-fade.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+.ng-if-fade.ng-leave,
+.ng-if-fade.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
+/* ngIf animation */
+.ng-if-height-5{
+    overflow: hidden;
+    position: relative;
+    bottom: 0;
+    max-height: 5rem;
+    transition: all ease-in-out 2s;
+}
+.ng-if-height-5.ng-enter,
+.ng-if-height-5.ng-leave {
+  transition: all ease-in-out 2s;
+}
+.ng-if-height-5.ng-enter,
+.ng-if-height-5.ng-leave.ng-leave-active {
+  max-height: 0;
+}
+.ng-if-height-5.ng-leave,
+.ng-if-height-5.ng-enter.ng-enter-active {
+  max-height: 2rem;
+}
+
+.multicolor-background{
+    background: linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+    background-size: 400% 400%;
+    -webkit-animation: Gradient 5s ease infinite;
+    -moz-animation: Gradient 5s ease infinite;
+    animation: Gradient 5s ease infinite;
+}
 /* ========================================================================== */
 /* PRODUCTS MANAGMENT */
 /* ========================================================================== */

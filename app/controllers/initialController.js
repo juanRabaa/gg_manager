@@ -2,6 +2,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
 function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory){
         $scope.controllerName = "paginationController";
         $scope.pagesFactory = pagesFactory;
+        $scope.productsFactory = productsFactory;
 
         tabsManagment.activateTab( $rootScope, 'paginationController');
     // =============================================================================
@@ -433,7 +434,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
 
     //Pages
     $scope.currentButtons = [];
-    $scope.buttonToDeleteID = '';
+    $scope.buttonToDelete = {};
     $scope.newButtonModalOpen = false;
     $scope.removeButtonOpen = false;
 
@@ -724,13 +725,13 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
         $scope.removeButtonOpen = false;
     }
 
-    $scope.openRemoveButtonModal = function(  buttonID ){
-        $scope.buttonToDeleteID = buttonID;
+    $scope.openRemoveButtonModal = function( button ){
+        $scope.buttonToDelete = button;
         $scope.removeButtonOpen = true;
     }
 
     $scope.deleteButtonConfirmed = function(){
-        $scope.deleteButton($scope.buttonToDeleteID);
+        $scope.deleteButton($scope.buttonToDelete);
         $scope.closeRemoveButtonModal();
     }
 
@@ -787,11 +788,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
 
     $scope.updateCurrentButtons = function(){
         if ( $scope.currentPage.pageType != "final_page" ){
-            $scope.currentButtons = $scope.buttonsInventory.filter(function( button, idx ){
-                if ( button.parentCategoryID == $scope.currentPage.ID )
-                    return true;
-                return false;
-            });
+            $scope.currentButtons = $scope.pagesFactory.getPageChilds($scope.currentPage);
         }
         else
             $scope.currentButtons = [];
@@ -855,12 +852,12 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
         return wantedButton;
     };
 
-    $scope.deleteButton = function( buttonID ){
-        jQuery("[data-button-id="+buttonID+"]").slideUp(function(){
-            $scope.currentButtons.find(function( button, index ){
-                if ( button.ID == buttonID ){
-                    $scope.removeButtonFromInventory( buttonID );
-                    $scope.removeButtonFromCurrents( buttonID );
+    $scope.deleteButton = function( button ){
+        jQuery("[data-button-id="+button.ID+"]").slideUp(function(){
+            $scope.currentButtons.find(function( buttonLoop, index ){
+                if ( buttonLoop.ID == button.ID ){
+                    $scope.removeButtonFromInventory( button.ID );
+                    $scope.removeButtonFromCurrents( button.ID );
                     return true;
                 }
                 return false;
@@ -893,7 +890,13 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
         $scope.pagesHistory.addPage( page );
     }
 
-    $scope.updateCurrentButtons();
-    $scope.onPageLoad();
-    console.log($scope);
+    $scope.loadingInterval = setInterval(function(){
+        if ( !$scope.pagesFactory.loading ){
+            $scope.updateCurrentButtons();
+            $scope.onPageLoad();
+            clearInterval($scope.loadingInterval);
+            console.log($scope);
+        }
+    }, 100);
+
 }]);
