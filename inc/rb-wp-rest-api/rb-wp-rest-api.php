@@ -113,7 +113,6 @@ class RB_WP_Rest_API_Extended{
     // =============================================================================
     // BEGINS
     // =============================================================================
-    //Bool, if set to true, all routes registered afterwards will need authentication
     private static $conditions = array();
     private static $user;
     private static $errorsLog = array();
@@ -122,18 +121,31 @@ class RB_WP_Rest_API_Extended{
     // CONDITIONS
     // =========================================================================
 
+    //Check if the user meets all the conditions necessaries to make the request
+    //ARGS          (Array)$conditions: Conditions to validate
+    //
+    //RETURNS:      true: user meet conditions
+    //              WP_Error or false: user doesnt meet conditions
     public static function check_conditions( $conditions ){
         self::$conditions = $conditions;
+        //CHECK CAPABILITIES
         $capabilities = self::check_condition('capability', 'check_user_capability');
         if ( is_object($capabilities) )
             return $capabilities;
-            self::$conditions = $conditions;
+        //CHECK ROLES
         $roles = self::check_condition('role', 'check_user_role');
         if ( is_object($roles) )
             return $roles;
         return true;
     }
 
+    //Checks if the user meets all the conditions of a certain type.
+    //ARGS          $condition_name: key in the $conditions array to check for.
+    //              (String)$validator: name of self function that will validate the conditions.
+    //                  Takes one parameter (string) value of the condition.
+    //
+    //RETURNS:      true: user meet conditions
+    //              WP_Error or false: user doesnt meet conditions
     public static function check_condition($condition_name, $validator){
         $result = true;
         $condition = self::$conditions[$condition_name];
@@ -152,12 +164,20 @@ class RB_WP_Rest_API_Extended{
         return $result;
     }
 
+    //Checks if the user can to something
+    //ARGS          (String)$capability_name: capability to check
+    //RETURNS       true: meets capability
+    //              WP_Error or false: fails current_user_can($capability_name)
     public static function check_user_capability($capability_name){
         if( current_user_can( self::$conditions[$capability_name] ) )
             return true;
         return RB_Rest_Error_Manager::throw_error('capability', $capability_name);
     }
 
+    //Checks if the user is of a certain role
+    //ARGS          (String)$role_name: role to check for
+    //RETURNS       true: the user is of the given role
+    //              WP_Error or false: the user doesn't have that role
     public static function check_user_role($role_name){
         $user = wp_get_current_user();
         if ( in_array( $role_name, (array) $user->roles ) )
