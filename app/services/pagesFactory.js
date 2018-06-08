@@ -1,6 +1,7 @@
-panelProductos.factory('pagesFactory', function($http) {
+panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(errorsManager, $http) {
     var pagesFactory = {
         pages: [],
+        error: false,
         loading: true,
         updatePages: function(){
             this.loading = true;
@@ -9,6 +10,12 @@ panelProductos.factory('pagesFactory', function($http) {
                 _this.pages = result.data;
                 _this.loading = false;
                 console.log(_this);
+            }).catch(function(e){
+                errorsManager.errorOcurred = {
+                    description: "No se pudieron cargar las paginas",
+                    reason: "Mensaje: " + e.data.message,
+                };
+                _this.error = e;
             });
         },
         getPageChilds: function( page ){
@@ -90,4 +97,4 @@ panelProductos.factory('pagesFactory', function($http) {
 
     pagesFactory.updatePages();
     return pagesFactory;
-});
+}]);

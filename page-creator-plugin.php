@@ -8,12 +8,12 @@ add_action( 'admin_menu', 'my_plugin_menu' );
 
 /** Step 1. */
 function my_plugin_menu() {
-	add_menu_page( 'My Plugin Options', 'Productos', 'manage_options', 'products-panel', 'my_plugin_options', get_template_directory_uri().'/assets/img/galagourmet.png');
+	add_menu_page( 'My Plugin Options', 'Productos', 'manage_categories', 'products-panel', 'my_plugin_options', get_template_directory_uri().'/assets/img/galagourmet.png');
 }
 
 /** Step 3. */
 function my_plugin_options() {
-	if ( !current_user_can( 'manage_options' ) )  {
+	if ( !current_user_can( 'manage_categories' ) )  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 
@@ -55,6 +55,7 @@ function my_plugin_options() {
     // =========================================================================
     // SERVICES
     // =========================================================================
+	wp_enqueue_script( 'gg-errors-managment', get_template_directory_uri()."/page-creator/app/services/errorsManager.js", true );
     wp_enqueue_script( 'gg-pages-factory', get_template_directory_uri()."/page-creator/app/services/pagesFactory.js", true );
     wp_enqueue_script( 'gg-products-factory', get_template_directory_uri()."/page-creator/app/services/productsFactory.js", true );
     wp_enqueue_script( 'gg-tabs-managment', get_template_directory_uri()."/page-creator/app/services/tabsManagment.js", true );

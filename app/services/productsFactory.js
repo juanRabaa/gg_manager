@@ -1,6 +1,7 @@
-panelProductos.factory('productsFactory', function($http) {
+panelProductos.factory('productsFactory', ['errorsManager', '$http', function(errorsManager, $http) {
     var productsFactory = {
         products: [],
+        error: false,
         loading: true,
         //Gets the products from the DB and store them in the products var
         updateProducts: function () {
@@ -123,7 +124,13 @@ panelProductos.factory('productsFactory', function($http) {
                 _this.products = result.data;
                 _this.loading = false;
                 console.log(_this);
-            });
+            }).catch(function(e){
+                errorsManager.errorOcurred = {
+                    description: "No se pudieron cargar los productos",
+                    reason: "Mensaje: " + e.data.message,
+                };;
+                _this.error = e;
+            });;
         },
         amountOfProducts: function(){
             return this.products.length;
@@ -204,4 +211,4 @@ panelProductos.factory('productsFactory', function($http) {
     productsFactory.updateProducts();
 
     return productsFactory;
-});
+}]);

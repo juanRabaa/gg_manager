@@ -1,7 +1,8 @@
-panelProductos.controller( 'generalController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory',
-function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory){
+panelProductos.controller( 'generalController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory', 'errorsManager',
+function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, errorsManager){
     $scope.pagesFactory = pagesFactory;
     $scope.productsFactory = productsFactory;
+    $scope.errorsManager = errorsManager;
 
     $scope.loadingManager = {
         loadingScreenSelector: '#full-loading-screen',
@@ -39,36 +40,6 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             }, 2000);
         },
     };
-
-    $scope.errorsManager = {
-        errorOcurred: false,
-        checkForErrorsRunning: false,
-        errorsInformation: {
-            noSecurePage: {
-                description: "La pagina debe ser cargada en https://",
-                solutionText: "Cargar en forma segura",
-                check: function(){
-                    return location.protocol != 'https:';
-                },
-                solution: function(){
-                    location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
-                },
-            },
-        },
-        checkForErrors: function(){
-            this.checkForErrorsRunning = true;
-            var result = false;
-            for(var errorName in this.errorsInformation) {
-                if( this.errorsInformation[errorName].check() ){
-                    this.errorOcurred = this.errorsInformation[errorName];
-                    result = this.errorsInformation[errorName];
-                    break;
-                }
-            }
-            this.checkForErrorsRunning = false;
-            return result;
-        },
-    }
 
     $scope.loadingManager.onLoading();
     console.log($scope);

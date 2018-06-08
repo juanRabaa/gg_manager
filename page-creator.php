@@ -16,8 +16,10 @@
 		<div class="loading-background-overlay"></div>
 		<div class="ng-cloak loading-error" ng-if="loadingManager.loadingScreenActivated && errorsManager.errorOcurred">
             <h3 class="general-loading center">ERROR</h3>
-			<p class="loading-data">{{errorsManager.errorOcurred.description}}</p>
-			<div ng-click="errorsManager.errorOcurred.solution()" class="loading-button gg-green-background btn waves-effect waves-light">{{errorsManager.errorOcurred.solutionText}}</div>
+			<p class="loading-data center">{{errorsManager.errorOcurred.description}}</p>
+			<p ng-if="errorsManager.errorOcurred.reason" class="loading-data">{{errorsManager.errorOcurred.reason}}</p>
+			<p ng-if="!errorsManager.errorOcurred.solution" class="loading-data">{{errorsManager.errorOcurred.solutionText}}</p>
+			<div ng-if="errorsManager.errorOcurred.solution" ng-click="errorsManager.errorOcurred.solution()" class="loading-button gg-green-background btn waves-effect waves-light">{{errorsManager.errorOcurred.solutionText}}</div>
         </div>
     </div>
 	<div id="header">
