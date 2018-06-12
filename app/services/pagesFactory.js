@@ -1,8 +1,29 @@
-panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(errorsManager, $http) {
+panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http, errorsManager) {
     var pagesFactory = {
         pages: [],
         error: false,
         loading: true,
+        pagesTree: function(){
+            var pages = this.pages.slice();
+            var basePage = this.getBasePage();
+            var pagesTree = [basePage];
+
+            function findChildsRecursively( firstPage ){
+                console.log(pages);
+                firstPage.childPagesObj = pages.filter( function(page, index){
+                    console.log(page.ID, page.parent_ID);
+                    if( page.parent_ID == firstPage.ID ){//Si es hijo de esta pagina
+                        //pages.splice(index,1);//lo removemos del array
+                        findChildsRecursively( page );
+                        return true;
+                    }
+                    return false;
+                });
+            }
+
+            findChildsRecursively( basePage );
+            return pagesTree;
+        },
         updatePages: function(){
             this.loading = true;
             var _this = this;
@@ -30,12 +51,12 @@ panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(error
             }
             return pages;
         },
-        getPageByID: function( pageID, callback ){
+        getPageBy: function( field, value, callback ){
             var wantedPage = null;
             var index;
 
             this.pages.find(function( page, idx ){
-                if ( page.ID == pageID ){
+                if ( page[field] == value ){
                     index = idx;
                     wantedPage = page;
                     return true;
@@ -48,26 +69,45 @@ panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(error
 
             return wantedPage;
         },
-        editPage: function( newPageData ){
+        getPageByID: function( pageID, callback ){
+            return this.getPageBy( "ID", pageID, callback );
+        },
+        getBasePage: function( callback ){
+            return this.getPageBy( "page_type", "base_page", callback );
+        },
+        editPage: function( newPageData, callback ){
             var _this = this;
             console.log("New Data: ", newPageData);
-            $http.post(templateUrl + '/wp-json/gg/v1/pages/edit', newPageData)
-            .then(function(result){
+            var url = templateUrl + '/wp-json/gg/v1/pages/edit';
+            var config = {
+                url: url,
+                data: newPageData,
+                savingNiceInfo: newPageData.name,
+            };
+            $http.post(config.url, config.data, config).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
                     _this.getPageByID( newPageData.ID, function( oldPage, index, array ){
                         Object.assign(oldPage, newPageData);
                     });
-                    Materialize.toast(newPageData.name + " editado correctamente!", 5000);
+                    //Materialize.toast(newPageData.name + " editado correctamente!", 5000);
                 }
                 else
                     Materialize.toast("Error al editar pagina: " + result.data.last_error, 10000);
+                if(callback)
+                    callback(result);
                 console.log(result);
             });
         },
-        addPage: function( page ){
+        addPage: function( page, callback ){
             var _this = this;
-            $http.post(templateUrl + '/wp-json/gg/v1/pages/add', page).then(function(result){
+            var url = templateUrl + '/wp-json/gg/v1/pages/add';
+            var config = {
+                url: url,
+                data: page,
+                savingNiceInfo: page.name,
+            };
+            $http.post(config.url,config.data,config).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
                     _this.pages.push(page);
@@ -75,22 +115,24 @@ panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(error
                 }
                 else
                     Materialize.toast("Error al agregar la pagina: " + result.data.last_error, 10000);
+                if(callback)
+                    callback(result);
                 console.log(result);
             });
         },
-        removePage: function( page ){
+        removePage: function( page, callback){
             var pagesFactory = this;
             $http.post(templateUrl + '/wp-json/gg/v1/pages/delete', page).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
                     pagesFactory.getPageByID( page.ID, function( wantedPage, index ){
                         pagesFactory.pages.splice(index, 1);
+                        Materialize.toast(page.name + " eliminado!", 5000);
                     });
-                    Materialize.toast(page.name + " eliminado!", 5000);
                 }
                 else
                     Materialize.toast("Error al eliminar la pagina: " + result.data.last_error, 10000);
-                console.log(result);
+                callback(result);
             });
         },
     };
@@ -98,3 +140,7 @@ panelProductos.factory('pagesFactory', ['errorsManager', '$http', function(error
     pagesFactory.updatePages();
     return pagesFactory;
 }]);
+
+panelProductos.config(function ($httpProvider) {
+  $httpProvider.interceptors.push('httpRequestInterceptor');
+});

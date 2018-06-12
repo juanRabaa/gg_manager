@@ -28,6 +28,8 @@ RB_WP_Rest_API_Extended::group(['role'   =>  'administrator'], function(){
     // PAGES ROUTES
     // =============================================================================
     RB_WP_Rest_API_Extended::post('gg/v1', '/pages/add', array( 'GG_Database_Manager', 'add_page' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/pages/edit', array( 'GG_Database_Manager', 'edit_page' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/pages/delete', array( 'GG_Database_Manager', 'delete_page' ));
 });
 
 

@@ -23,11 +23,11 @@ $img_dir = $page_creator_dir . "/assets/img";
     <!--  PAGES CONTROLS, VIEWS, EDITION-->
     <!-- ======================================================================= -->
     <div id="pages-controls-loaded" ng-if="!pagesFactory.loading">
-        <div id="button-controls-container" ng-if="currentPage.pageType == 'category_page'">
+        <div id="button-controls-container" ng-if="currentPage.page_type == 'category_page' || currentPage.page_type == 'base_page'">
             <ul id="buttons-holder" ui-sortable="sortableOptions" ng-model="currentButtons" class="buttons-holder collapsible popout" data-collapsible="accordion">
                 <!-- =============================================================== -->
                 <!-- Buttons ng-repeat -->
-                <li ng-if="currentPage.buttonsType == 'no_image'" data-button-id="{{button.ID}}" ng-class="{'not-visible-page': button.visibility == false}" class="rb-bullet-draggable buttons-list-item"
+                <li ng-if="currentPage.buttons_type == 'no_image'" data-button-id="{{button.ID}}" ng-class="{'not-visible-page': button.visibility == false}" class="rb-bullet-draggable buttons-list-item"
                 ng-repeat="button in currentButtons">
                 	<span class="rb-draggable-ball"></span>
         			<div class="row rb-collapsible-title rb-draggable-li-title collapsible-header button-header button-header-full-controls no-padding gg-golden-background">
@@ -50,38 +50,40 @@ $img_dir = $page_creator_dir . "/assets/img";
                         </div>
         			</div>
         			<div class="rb-collapsible-body collapsible-body">
-                        <div input-field>
-                            <input type="text" ng-model="button.name">
-                            <label ng-class="{active: button.name}">Nombre</label>
-                        </div>
-                        <div input-field>
-                            <select class="" ng-model="button.pageType" material-select watch>
-                                <option ng-repeat="type in pageTypes" value="{{type.value}}">{{type.name}}</option>
-                            </select>
-                            <label>Tipo de pagina</label>
-                        </div>
-                        <div input-field ng-show="button.pageType != 'final_page'" >
-                            <select ng-model="button.buttonsType" material-select watch>
-                                <option ng-repeat="type in buttonsType" value="{{type.value}}">{{type.name}}</option>
-                            </select>
-                            <label>Diseño botones</label>
-                        </div>
-                        <div input-field>
-                            <textarea ng-model="button.description" class="materialize-textarea"></textarea>
-                            <label ng-class="{active: button.description}">Descripcion</label>
-                        </div>
-                        <div class="visibility-checkbox">
-                            <label>
-                                <input type="checkbox" ng-model="button.visibility" ng-checked="button.visibility">
-                                <span>Visible al publico</span>
-                            </label>
-                        </div>
+                        <form ng-model="button" form-on-change="manageSavingQueue">
+                            <div input-field>
+                                <input type="text" ng-model="button.name">
+                                <label ng-class="{active: button.name}">Nombre</label>
+                            </div>
+                            <div input-field>
+                                <select class="" ng-model="button.page_type" material-select watch>
+                                    <option ng-repeat="type in pageTypes" value="{{type.value}}">{{type.name}}</option>
+                                </select>
+                                <label>Tipo de pagina</label>
+                            </div>
+                            <div input-field ng-show="button.page_type != 'final_page'" >
+                                <select ng-model="button.buttons_type" material-select watch>
+                                    <option ng-repeat="type in buttonsTypes" value="{{type.value}}">{{type.name}}</option>
+                                </select>
+                                <label>Diseño botones</label>
+                            </div>
+                            <div input-field>
+                                <textarea ng-model="button.description" class="materialize-textarea"></textarea>
+                                <label ng-class="{active: button.description}">Descripcion</label>
+                            </div>
+                            <div class="visibility-checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="button.visibility" ng-checked="button.visibility == 1 || button.visibility == true">
+                                    <span>Visible al publico</span>
+                                </label>
+                            </div>
+                        </form>
         	        </div>
         		</li>
                 <!-- =============================================================== -->
                 <!-- Buttons ng-repeat -->
                 <!-- =============================================================== -->
-                <li ng-if="currentPage.buttonsType == 'side_image' || currentPage.buttonsType == 'huge_image'" data-button-id="{{button.ID}}" ng-class="{'not-visible-page': button.visibility == false}" class="rb-bullet-draggable buttons-list-item"
+                <li ng-if="currentPage.buttons_type == 'side_image' || currentPage.buttons_type == 'huge_image'" data-button-id="{{button.ID}}" ng-class="{'not-visible-page': button.visibility == false}" class="rb-bullet-draggable buttons-list-item"
                 ng-repeat="button in currentButtons">
                 	<span class="rb-draggable-ball"></span>
         			<div class="row rb-collapsible-title rb-draggable-li-title collapsible-header button-header button-header-full-controls no-padding gg-golden-background">
@@ -101,38 +103,40 @@ $img_dir = $page_creator_dir . "/assets/img";
                             ng-click="changeToPage(button.ID, true, true);"></i>
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Borrar"
                             class="fas fa-box-open six columns not-collapse delete-button gg-red-background btn waves-effect waves-light hover-tilt" aria-hidden="true"
-                            ng-click="openRemoveButtonModal(button.ID)" data-target='removeButtonModal' modal open="removeButtonOpen"></i>
+                            ng-click="openRemoveButtonModal(button)" data-target='removeButtonModal' modal open="removeButtonOpen"></i>
                         </div>
         			</div>
         			<div class="rb-collapsible-body collapsible-body">
-                        <div input-field>
-                            <input type="text" ng-model="button.name">
-                            <label ng-class="{active: button.name}">Nombre</label>
-                        </div>
-                        <div input-field>
-                            <select class="" ng-model="button.pageType" material-select watch>
-                                <option ng-repeat="type in pageTypes" value="{{type.value}}">{{type.name}}</option>
-                            </select>
-                            <label>Tipo de pagina</label>
-                        </div>
-                        <div input-field ng-show="button.pageType != 'final_page'" >
-                            <select ng-model="button.buttonsType" material-select watch>
-                                <option ng-repeat="type in buttonsType" value="{{type.value}}">{{type.name}}</option>
-                            </select>
-                            <label>Diseño botones</label>
-                        </div>
-                        <div input-field>
-                            <textarea ng-model="button.description" class="materialize-textarea"></textarea>
-                            <label ng-class="{active: button.description}">Descripcion</label>
-                        </div>
-                        <div ng-model="button.image" rb-wp-gallery rb-wp-gallery-name="Imagen" rb-wp-gallery-button="Cambiar imagen"
-                        rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
-                        <div class="visibility-checkbox">
-                            <label>
-                                <input type="checkbox" ng-model="button.visibility" ng-checked="button.visibility">
-                                <span>Visible al publico</span>
-                            </label>
-                        </div>
+                        <form ng-model="button" form-on-change="manageSavingQueue">
+                            <div input-field>
+                                <input type="text" ng-model="button.name">
+                                <label ng-class="{active: button.name}">Nombre</label>
+                            </div>
+                            <div input-field>
+                                <select class="" ng-model="button.page_type" material-select watch>
+                                    <option ng-repeat="type in pageTypes" value="{{type.value}}">{{type.name}}</option>
+                                </select>
+                                <label>Tipo de pagina</label>
+                            </div>
+                            <div input-field ng-show="button.page_type != 'final_page'" >
+                                <select ng-model="button.buttons_type" material-select watch>
+                                    <option ng-repeat="type in buttonsTypes" value="{{type.value}}">{{type.name}}</option>
+                                </select>
+                                <label>Diseño botones</label>
+                            </div>
+                            <div input-field>
+                                <textarea ng-model="button.description" class="materialize-textarea"></textarea>
+                                <label ng-class="{active: button.description}">Descripcion</label>
+                            </div>
+                            <div ng-model="button.image" rb-wp-gallery rb-wp-gallery-name="Imagen" rb-wp-gallery-button="Cambiar imagen"
+                            rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
+                            <div class="visibility-checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="button.visibility" ng-checked="button.visibility == 1 || button.visibility == true">
+                                    <span>Visible al publico</span>
+                                </label>
+                            </div>
+                        </form>
         	        </div>
         		</li>
         	</ul>
@@ -160,21 +164,23 @@ $img_dir = $page_creator_dir . "/assets/img";
                         <input type="text" ng-model="newButton.name">
                         <label ng-class="{active: newButton.name}">Nombre</label>
                     </div>
+                    <div ng-model="newButton.image" ng-if="currentPage.buttons_type != 'no_image'" rb-wp-gallery rb-wp-gallery-name="Imagen"
+                    rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
                     <div input-field>
-                        <select class="" ng-model="newButton.pageType" material-select watch>
+                        <textarea rows="4" ng-model="newButton.description" class="materialize-textarea"></textarea>
+                        <label ng-class="{active: newButton.description}">Descripcion</label>
+                    </div>
+                    <div input-field>
+                        <select class="" ng-model="newButton.page_type" material-select watch>
                             <option ng-repeat="type in pageTypes" value="{{type.value}}">{{type.name}}</option>
                         </select>
                         <label>Tipo de pagina</label>
                     </div>
-                    <div input-field ng-show="newButton.pageType != 'final_page'" >
-                        <select ng-model="newButton.buttonsType" material-select watch>
-                            <option ng-repeat="type in buttonsType" value="{{type.value}}">{{type.name}}</option>
+                    <div input-field ng-show="newButton.page_type != 'final_page'" >
+                        <select ng-model="newButton.buttons_type" material-select watch>
+                            <option ng-repeat="type in buttonsTypes" value="{{type.value}}">{{type.name}}</option>
                         </select>
                         <label>Diseño botones</label>
-                    </div>
-                    <div input-field>
-                        <textarea rows="4" ng-model="newButton.description" class="materialize-textarea"></textarea>
-                        <label ng-class="{active: newButton.description}">Descripcion</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -206,7 +212,7 @@ $img_dir = $page_creator_dir . "/assets/img";
         <!-- ======================================================================= -->
         <!--  PRODUCTS CONTROLS, VIEWS, EDITION-->
         <!-- ======================================================================= -->
-        <div id="products-edition-controls" ng-if="currentPage.pageType == 'final_page'">
+        <div id="products-edition-controls" ng-if="currentPage.page_type == 'final_page'">
 
             <ul id="buttons-holder" ui-sortable="sortableOptions" ng-model="currentProducts" class="buttons-holder collapsible popout" data-collapsible="accordion">
                 <!-- =============================================================== -->
@@ -346,3 +352,18 @@ $img_dir = $page_creator_dir . "/assets/img";
         </div>
     </div>
 </div>
+<!-- 
+<script type="text/ng-template"  id="tree_item_renderer.html">
+    {{data.name}}
+    <ul>
+        <li ng-repeat="data in data.childPagesObj" ng-include="'tree_item_renderer.html'"></li>
+    </ul>
+</script>
+
+<ul>
+    <li ng-repeat="data in pagesTree" ng-include="'tree_item_renderer.html'"></li>
+</ul>
+
+<div id="pages-tree">
+
+</div> -->

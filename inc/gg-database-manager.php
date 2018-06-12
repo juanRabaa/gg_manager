@@ -154,11 +154,13 @@ class GG_Database_Manager{
 
     public function add_page( WP_REST_Request $request ) {
 		global $wpdb;
+        $buttons_type = $request['page_type'] == 'final_page' ? "" : $request['buttons_type'];
+
 		$page_data = array(
 			'ID'   			 	=> $request['ID'],
 			'name'    			=> $request['name'],
 			'description'    	=> $request['description'],
-			'buttons_type'    	=> $request['buttons_type'],
+			'buttons_type'    	=> $buttons_type,
 			'page_type'    		=> $request['page_type'],
 			'image'	             => $request['image'],
 			'visibility'    	=> 1,
@@ -173,6 +175,27 @@ class GG_Database_Manager{
     public function delete_page( WP_REST_Request $request ) {
         global $wpdb;
 		$wpdb->delete(self::wpdb_pages_table(), array('ID' => $request['ID']), array( '%s' ));
+		return $wpdb;
+	}
+
+    public function edit_page( WP_REST_Request $request ) {
+		global $wpdb;
+        $buttons_type = $request['page_type'] == 'final_page' ? "" : $request['buttons_type'];
+
+		$page_data = array(
+			'name'    			=> $request['name'],
+			'description'    	=> $request['description'],
+			'buttons_type'    	=> $buttons_type,
+			'page_type'    		=> $request['page_type'],
+			'image'	            => $request['image'],
+			'visibility'    	=> $request['visibility'],
+            'position'    		=> $request['position'],
+            'parent_ID'    		=> $request['parent_ID'],
+		);
+
+		$wpdb->update(self::wpdb_pages_table(), $page_data, array('ID' => $request['ID']),
+            array('%s','%s','%s','%s','%s','%d','%d','%s'),array( '%s' )
+        );
 		return $wpdb;
 	}
 }

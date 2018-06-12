@@ -1,8 +1,10 @@
 panelProductos.controller( 'generalController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory', 'errorsManager',
-function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, errorsManager){
+'statusManager', 'httpStatus', function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, errorsManager, statusManager, httpStatus){
     $scope.pagesFactory = pagesFactory;
     $scope.productsFactory = productsFactory;
     $scope.errorsManager = errorsManager;
+    $scope.statusManager = statusManager;
+    $scope.httpStatus = httpStatus;
 
     $scope.loadingManager = {
         loadingScreenSelector: '#full-loading-screen',
@@ -27,7 +29,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             $scope.errorsManager.checkForErrors();
         },
         essentialsReady: function(){
-            return !$scope.pagesFactory.loading && !$scope.productsFactory.loading && !$scope.errorsManager.checkForErrorsRunning
+            return !$scope.pagesFactory.loading && !$scope.productsFactory.loading && !$scope.errorsManager.checkingForErrors
             && !$scope.errorsManager.errorOcurred ;
         },
         hideLoadingScreen: function(){
@@ -35,13 +37,15 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             setTimeout(function(){
                 $(_this.loadingScreenSelector).fadeOut(400, function(){
                     _this.loadingScreenActivated = false;
-                    $scope.$apply();
+                    //$scope.$apply();
                 });
             }, 2000);
         },
     };
 
     $scope.loadingManager.onLoading();
+
+
     console.log($scope);
 
 }]);

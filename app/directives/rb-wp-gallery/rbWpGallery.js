@@ -78,6 +78,6 @@ panelProductos.directive('rbWpGallery', [function() {
         ngModel: '=',
     },
     link: link,
-    templateUrl: 'gallery.html'
+    templateUrl: wordpressData.pageCreatorUrl + '/app/directives/rb-wp-gallery/gallery.html',
   };
 }]);

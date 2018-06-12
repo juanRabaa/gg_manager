@@ -39,5 +39,14 @@
 		<div id="gg-ng-view" ng-view>
 		</div>
 	</div>
+	<div id="gg-saving-bar">
+		<sk-fading-circle ng-if="statusManager.savingToDB"></sk-fading-circle>
+		<i ng-if="!statusManager.savingToDB" class="fas fa-check gg-golden-color"></i>
+		<div class="info">
+			<span ng-repeat="postRequest in httpStatus.postQueue">
+				{{postRequest.savingNiceInfo}}<span ng-if="!$last">, </span>
+			</span>
+		</div>
+	</div>
 </div>
 </div>
