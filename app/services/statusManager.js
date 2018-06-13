@@ -52,7 +52,7 @@ panelProductos.factory('httpStatus', ['statusManager', '$timeout', function(stat
                 if(this.configIsPOST(request))
                     statusManager.savingToDB = true;
             }
-            console.log(request);
+            //console.log(request);
             return request;
         },
         manageRequestError: function( rejection ){
@@ -61,7 +61,7 @@ panelProductos.factory('httpStatus', ['statusManager', '$timeout', function(stat
                 if(this.configIsPOST(request))
                     statusManager.savingToDB = true;
             }
-            console.log(request);
+            //console.log(request);
             return request;
         },
         manageNewResponse: function( reponse ){
@@ -74,7 +74,7 @@ panelProductos.factory('httpStatus', ['statusManager', '$timeout', function(stat
             return reponse;
         },
     };
-    console.log(httpStatus);
+    //console.log(httpStatus);
     return httpStatus;
 }]);
 

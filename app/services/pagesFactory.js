@@ -9,10 +9,9 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             var pagesTree = [basePage];
 
             function findChildsRecursively( firstPage ){
-                console.log(pages);
                 firstPage.childPagesObj = pages.filter( function(page, index){
-                    console.log(page.ID, page.parent_ID);
                     if( page.parent_ID == firstPage.ID ){//Si es hijo de esta pagina
+                        console.log("CHILD");
                         //pages.splice(index,1);//lo removemos del array
                         findChildsRecursively( page );
                         return true;
@@ -20,8 +19,9 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
                     return false;
                 });
             }
-
+            console.log(basePage);
             findChildsRecursively( basePage );
+            console.log(pagesTree);
             return pagesTree;
         },
         updatePages: function(){
@@ -29,43 +29,64 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             var _this = this;
             $http.get(templateUrl + '/wp-json/gg/v1/pages/get/all').then(function(result){
                 _this.pages = result.data;
+                _this.basePage = _this.pages.find( page => page.page_type == "base_page" );
+                function findChildsRecursively( firstPage ){
+                    firstPage.childPagesObj = _this.pages.filter( function(page, index){
+                        if( page.parent_ID == firstPage.ID ){//Si es hijo de esta pagina
+                            console.log("CHILD");
+                            //pages.splice(index,1);//lo removemos del array
+                            findChildsRecursively( page );
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                findChildsRecursively( _this.basePage );
                 _this.loading = false;
-                console.log(_this);
             }).catch(function(e){
                 errorsManager.errorOcurred = {
                     description: "No se pudieron cargar las paginas",
-                    reason: "Mensaje: " + e.data.message,
+                    reason: "Mensaje: " + e,
                 };
                 _this.error = e;
             });
         },
         getPageChilds: function( page ){
-            var pages = [];
-            if ( page.pageType != "final_page" ){
-                console.log(this);
-                pages = this.pages.filter(function( filtPage, idx ){
-                    if ( filtPage.parent_ID == page.ID )
-                        return true;
-                    return false;
-                });
-            }
-            return pages;
+            return page.childPagesObj;
         },
         getPageBy: function( field, value, callback ){
             var wantedPage = null;
             var index;
+            var parentPage = {};
 
-            this.pages.find(function( page, idx ){
-                if ( page[field] == value ){
-                    index = idx;
-                    wantedPage = page;
-                    return true;
+            function searchRecursively( firstPage, idx ){
+                var recRes;
+                if( firstPage.pageType != "final_page" ){
+                    if ( firstPage[field] == value ){
+                        index = idx;
+                        wantedPage = firstPage;
+                        return true;
+                    }
+                    else{
+                        if ( firstPage.childPagesObj ){//Si tiene hijos
+                            recRes = firstPage.childPagesObj.some(function( page, idx ){//Si esta en alguno de sus hijos
+                                return searchRecursively( page, idx );
+                            });
+                            if ( recRes )
+                                parentPage = firstPage;
+                            return recRes;
+                        }
+                        return false;
+                    }
                 }
-                return false;
-            });
+                else
+                    return false;
+            }
+
+            searchRecursively(this.basePage, 0);
 
             if( callback )
-                callback( wantedPage, index, this.pages );
+                callback( wantedPage, index, parentPage.childPagesObj );
 
             return wantedPage;
         },
@@ -73,7 +94,7 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             return this.getPageBy( "ID", pageID, callback );
         },
         getBasePage: function( callback ){
-            return this.getPageBy( "page_type", "base_page", callback );
+            return this.basePage;
         },
         editPage: function( newPageData, callback ){
             var _this = this;
@@ -99,6 +120,9 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
                 console.log(result);
             });
         },
+        addChild: function(parentID, child){
+            this.getPageByID(parentID).childPagesObj.push(child);
+        },
         addPage: function( page, callback ){
             var _this = this;
             var url = templateUrl + '/wp-json/gg/v1/pages/add';
@@ -110,7 +134,7 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             $http.post(config.url,config.data,config).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
-                    _this.pages.push(page);
+                    _this.addChild(page.parent_ID, page);
                     Materialize.toast(page.name + " agregada!", 5000);
                 }
                 else
@@ -125,8 +149,9 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             $http.post(templateUrl + '/wp-json/gg/v1/pages/delete', page).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
-                    pagesFactory.getPageByID( page.ID, function( wantedPage, index ){
-                        pagesFactory.pages.splice(index, 1);
+                    pagesFactory.getPageByID( page.ID, function( wantedPage, index, pagesArr ){
+                        console.log(wantedPage, index, pagesArr);
+                        pagesArr.splice(index, 1);
                         Materialize.toast(page.name + " eliminado!", 5000);
                     });
                 }

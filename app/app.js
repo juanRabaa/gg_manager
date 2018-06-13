@@ -40,7 +40,7 @@ panelProductos.factory('httpRequestInterceptor', function () {
   return {
     request: function (config) {
       config.headers['X-WP-Nonce'] = wordpressData.nonce;
-      console.log(config);
+      //console.log(config);
       return config;
     }
   };
