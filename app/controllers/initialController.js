@@ -1,8 +1,9 @@
-panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory', '$timeout',
-function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, $timeout){
+panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory', 'pagesProductsFactory',
+'$timeout', function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, pagesProductsFactory, $timeout){
     $scope.controllerName = "paginationController";
     $scope.pagesFactory = pagesFactory;
     $scope.productsFactory = productsFactory;
+    $scope.pagesProductsFactory = pagesProductsFactory;
     //$scope.pagesTree = $scope.pagesFactory.pagesTree();
 
     tabsManagment.activateTab( $rootScope, 'paginationController');
@@ -724,19 +725,12 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
     }*/
 
     $scope.updateCurrentProducts = function(){
-        if ( $scope.currentPage.pageType == "final_page" ){
-            $scope.currentProducts = [];
-            $scope.productsFinalPage.filter(function( productFinalPageRelation, idx ){
-                if ( productFinalPageRelation.pageID == $scope.currentPage.ID ){
-                    productFinalPageRelation.product_object = $scope.getProductByID(productFinalPageRelation.prodID);
-                    $scope.currentProducts.push( productFinalPageRelation );
-                    return true;
-                }
-                return false;
-            });
-        }
+        console.log("Searchin products for: ", $scope.currentPage.ID);
+        if ( $scope.currentPage.page_type == "final_page" )
+            $scope.currentProducts = $scope.pagesProductsFactory.getProductsFrom($scope.currentPage.ID);
         else
             $scope.currentProducts = [];
+        console.log($scope.currentProducts);
     };
 
     $scope.getProductByID = function( productID, onlyCurrents, callback ){
@@ -902,7 +896,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             $scope.currentPage = $scope.getButton( buttonID,  searchOnCurrentButtons );
             console.log("Changing to: ", $scope.currentPage.ID);
 
-            if ( $scope.currentPage.pageType == "final_page" ){
+            if ( $scope.currentPage.page_type == "final_page" ){
                 console.log("UPDATE CURRENT PRODUCTS");
                 $scope.updateCurrentProducts();
             }

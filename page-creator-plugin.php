@@ -60,6 +60,7 @@ function my_plugin_options() {
 	wp_enqueue_script( 'gg-errors-managment', get_template_directory_uri()."/page-creator/app/services/errorsManager.js", true );
     wp_enqueue_script( 'gg-pages-factory', get_template_directory_uri()."/page-creator/app/services/pagesFactory.js", true );
     wp_enqueue_script( 'gg-products-factory', get_template_directory_uri()."/page-creator/app/services/productsFactory.js", true );
+	wp_enqueue_script( 'gg-pages-products-factory', get_template_directory_uri()."/page-creator/app/services/pagesProductsFactory.js", true );
     wp_enqueue_script( 'gg-tabs-managment', get_template_directory_uri()."/page-creator/app/services/tabsManagment.js", true );
     // ============================================================================
     // CONTROLLERS

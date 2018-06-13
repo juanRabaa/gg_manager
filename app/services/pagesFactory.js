@@ -167,7 +167,3 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
     pagesFactory.updatePages();
     return pagesFactory;
 }]);
-
-panelProductos.config(function ($httpProvider) {
-  $httpProvider.interceptors.push('httpRequestInterceptor');
-});

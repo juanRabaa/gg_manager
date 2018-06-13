@@ -120,24 +120,6 @@ class GG_Database_Manager{
 		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_products_table() . ' WHERE ID = "' . $data['id'] . '"');
 	}
 
-    public function add_product_to_page( WP_REST_Request $request ) {
-        global $wpdb;
-		$product_page_rel_data = array(
-			'prodID'                 => $request['prodID'],
-			'pageID'                 => $request['pageID'],
-			'name'                   => $request['name'],
-			'decription'             => $request['decription'],
-			'image'                  => $request['image'],
-			'use_prod_name'          => $request['use_prod_name'],
-			'use_prod_description'   => $request['use_prod_description'],
-            'use_prod_image'        => $request['use_prod_image'],
-            'position'              => $request['position'],
-		);
-
-		$wpdb->insert(self::wpdb_fpages_products_table(), $product_page_rel_data, array('%s','%s','%s','%s','%s','%d','%d','%d','%d'));
-		return $wpdb;
-	}
-
     // =============================================================================
     // PAGES
     // =============================================================================
@@ -196,6 +178,32 @@ class GG_Database_Manager{
 		$wpdb->update(self::wpdb_pages_table(), $page_data, array('ID' => $request['ID']),
             array('%s','%s','%s','%s','%s','%d','%d','%s'),array( '%s' )
         );
+		return $wpdb;
+	}
+
+    // =============================================================================
+    // PAGES PRODUCTS
+    // =============================================================================
+    public function get_fpages_products( $data ) {
+		global $wpdb;
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_fpages_products_table() . ' ORDER BY name');
+	}
+
+    public function add_product_to_page( WP_REST_Request $request ) {
+        global $wpdb;
+		$product_page_rel_data = array(
+			'prodID'                 => $request['prodID'],
+			'pageID'                 => $request['pageID'],
+			'name'                   => $request['name'],
+			'description'             => $request['description'],
+			'image'                  => $request['image'],
+			'use_prod_name'          => $request['use_prod_name'],
+			'use_prod_description'   => $request['use_prod_description'],
+            'use_prod_image'        => $request['use_prod_image'],
+            'position'              => $request['position'],
+		);
+
+		$wpdb->insert(self::wpdb_fpages_products_table(), $product_page_rel_data, array('%s','%s','%s','%s','%s','%d','%d','%d','%d'));
 		return $wpdb;
 	}
 }
