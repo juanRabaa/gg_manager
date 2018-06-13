@@ -46,13 +46,15 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             }).catch(function(e){
                 errorsManager.errorOcurred = {
                     description: "No se pudieron cargar las paginas",
-                    reason: "Mensaje: " + e,
+                    reason: "Mensaje: " + e.data.message,
                 };
                 _this.error = e;
             });
         },
         getPageChilds: function( page ){
-            return page.childPagesObj;
+            if ( page.hasOwnProperty('childPagesObj') )
+                return page.childPagesObj;
+            return [];
         },
         getPageBy: function( field, value, callback ){
             var wantedPage = null;

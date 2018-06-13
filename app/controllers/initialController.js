@@ -823,7 +823,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             return;
         }
 
-
+        $scope.newButton.childPagesObj = [];
         $scope.newButton.parent_ID = $scope.currentPage.ID;
         $scope.newButton.position = $scope.currentButtons.length;
         $scope.pagesFactory.addPage($scope.newButton, function(){
@@ -868,7 +868,7 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
         var wantedButton = null;
         var index;
         var buttonsHolder = $scope.currentButtons;
-
+        console.log("Searchin for button ID: ", buttonID);
         if ( onlyCurrents ){
             wantedButton = buttonsHolder.find(function( button, idx ){
                 if ( button.ID == buttonID ){
@@ -900,17 +900,21 @@ function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory
             //$("#buttons-holder").slideUp(1);
 
             $scope.currentPage = $scope.getButton( buttonID,  searchOnCurrentButtons );
-            $scope.updateCurrentButtons();
+            console.log("Changing to: ", $scope.currentPage.ID);
+
             if ( $scope.currentPage.pageType == "final_page" ){
                 console.log("UPDATE CURRENT PRODUCTS");
                 $scope.updateCurrentProducts();
             }
+            else
+                $scope.updateCurrentButtons();
 
             //$("#buttons-holder").slideDown();
 
-            if( addToHistory )
-                $scope.pagesHistory.addPage($scope.currentPage );
-
+            if( addToHistory ){
+                console.log("Adding " + $scope.currentPage.name + " to history");
+                $scope.pagesHistory.addPage($scope.currentPage);
+            }
             $scope.onPageLoad();
             console.log($scope.pagesHistory.history);
         }
