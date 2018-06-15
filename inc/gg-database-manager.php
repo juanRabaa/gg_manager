@@ -206,6 +206,28 @@ class GG_Database_Manager{
 		$wpdb->insert(self::wpdb_fpages_products_table(), $product_page_rel_data, array('%s','%s','%s','%s','%s','%d','%d','%d','%d'));
 		return $wpdb;
 	}
+
+    public function edit_fpage_product( WP_REST_Request $request ) {
+        global $wpdb;
+		$new_data = array(
+			'name'                   => $request['name'],
+			'description'             => $request['description'],
+			'image'                  => $request['image'],
+			'use_prod_name'          => $request['use_prod_name'],
+			'use_prod_description'   => $request['use_prod_description'],
+            'use_prod_image'        => $request['use_prod_image'],
+            'position'              => $request['position'],
+		);
+		$wpdb->update(self::wpdb_fpages_products_table(), $new_data, array('prodID' => $request['prodID'], 'pageID' => $request['pageID'] ),
+        array('%s','%s','%s','%d','%d','%d','%d'));
+		return $wpdb;
+	}
+
+    public function delete_fpage_product( WP_REST_Request $request ) {
+        global $wpdb;
+		$wpdb->delete(self::wpdb_fpages_products_table(), array('prodID' => $request['prodID'], 'pageID' => $request['pageID'] ));
+		return $wpdb;
+	}
 }
 
 ?>

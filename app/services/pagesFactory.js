@@ -1,8 +1,9 @@
-panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http, errorsManager) {
+panelProductos.factory('pagesFactory', ['$http', '$q', 'errorsManager', function($http, $q, errorsManager) {
     var pagesFactory = {
         pages: [],
         error: false,
         loading: true,
+        basePage: {},
         pagesTree: function(){
             var pages = this.pages.slice();
             var basePage = this.getBasePage();
@@ -60,6 +61,7 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             var wantedPage = null;
             var index;
             var parentPage = {};
+            var lastParent = {};
 
             function searchRecursively( firstPage, idx ){
                 var recRes;
@@ -67,16 +69,15 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
                     if ( firstPage[field] == value ){
                         index = idx;
                         wantedPage = firstPage;
+                        parentPage = lastParent;
                         return true;
                     }
                     else{
                         if ( firstPage.childPagesObj ){//Si tiene hijos
                             recRes = firstPage.childPagesObj.some(function( page, idx ){//Si esta en alguno de sus hijos
+                                lastParent = firstPage;
                                 return searchRecursively( page, idx );
                             });
-                            if ( recRes )
-                                parentPage = firstPage;
-                            return recRes;
                         }
                         return false;
                     }
@@ -88,7 +89,7 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
             searchRecursively(this.basePage, 0);
 
             if( callback )
-                callback( wantedPage, index, parentPage.childPagesObj );
+                callback( wantedPage, index, parentPage.childPagesObj, parentPage );
 
             return wantedPage;
         },
@@ -148,19 +149,35 @@ panelProductos.factory('pagesFactory', ['$http', 'errorsManager', function($http
         },
         removePage: function( page, callback){
             var pagesFactory = this;
-            $http.post(templateUrl + '/wp-json/gg/v1/pages/delete', page).then(function(result){
+            var promise = $http.post(templateUrl + '/wp-json/gg/v1/pages/delete', page);
+            promise.then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
-                    pagesFactory.getPageByID( page.ID, function( wantedPage, index, pagesArr ){
-                        console.log(wantedPage, index, pagesArr);
-                        pagesArr.splice(index, 1);
-                        Materialize.toast(page.name + " eliminado!", 5000);
+                    pagesFactory.getPageByID( page.ID, function( wantedPage, index, pagesArr, parentPage ){
+                        if ( wantedPage ){
+                            console.log("About to remove : ", wantedPage.name, "And all its childs");
+                            console.log("Parent page: ", parentPage.ID);
+                            var childPromises = [];
+                            //Remove all the child pages from this page
+                            //Should make this an optional step. If we dont want to eliminate them,
+                            //We can send them to another db table
+                            pagesFactory.getPageChilds(wantedPage).forEach(function(page){
+                                console.log("Pushing remove promise for: ", page.name);
+                                childPromises.push(pagesFactory.removePage(page));
+                            });
+                            $q.all(childPromises).then(function(){
+                                console.log("All child removed --> Proceeding to remove page from array: ", wantedPage.name);
+                                pagesArr.splice(index, 1);
+                                Materialize.toast(page.name + " eliminado!", 5000);
+                            });
+                        }
                     });
                 }
                 else
                     Materialize.toast("Error al eliminar la pagina: " + result.data.last_error, 10000);
                 callback(result);
             });
+            return promise;
         },
     };
 

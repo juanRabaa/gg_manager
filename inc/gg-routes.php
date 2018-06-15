@@ -38,7 +38,9 @@ RB_WP_Rest_API_Extended::group(['role'   =>  'administrator'], function(){
     // =========================================================================
     // PAGES PRODUCTS ROUTES
     // =========================================================================
-    RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/add_product', array( 'GG_Database_Manager', 'add_product_to_page' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/add', array( 'GG_Database_Manager', 'add_product_to_page' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/edit', array( 'GG_Database_Manager', 'edit_fpage_product' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/delete', array( 'GG_Database_Manager', 'delete_fpage_product' ));
 });
 
 

@@ -4,6 +4,10 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     $scope.pagesFactory = pagesFactory;
     $scope.productsFactory = productsFactory;
     $scope.pagesProductsFactory = pagesProductsFactory;
+    $scope.basePage = $scope.pagesFactory.basePage;
+    $scope.productsTrunk = $scope.productsFactory.products;
+    console.log($scope.productsTrunk);
+    console.log($scope.basePage.childPagesObj);
     //$scope.pagesTree = $scope.pagesFactory.pagesTree();
 
     tabsManagment.activateTab( $rootScope, 'paginationController');
@@ -370,7 +374,6 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         },
     ];
     */
-    $scope.productsTrunk = productsFactory.products;
 
     $scope.buttonsTypes = [
         {
@@ -398,7 +401,12 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         },
     ];
 
-
+    $scope.isTrue = function(value){
+        return value == true;
+    };
+    $scope.teste = function(asd){
+            console.log(asd);
+    };
     // =====================================================================
     // SAVING INFORMATION
     // =====================================================================
@@ -577,6 +585,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         }
         return prodRelation.name;
     }
+
     $scope.prodPageRelationDescription = function( prodRelation ){
         if ( prodRelation.use_prod_description )
             return prodRelation.product_object.description;
@@ -598,6 +607,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             if ( product.product_object.ID == productID )
                 result = true;
         });
+        console.log(productID, result);
         return result;
     }
 
@@ -666,7 +676,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     }
 
     $scope.modalRemoveProductConfirmed = function(){
-        $scope.deleteSingleProductFromPage( $scope.toRemoveProduct );
+        $scope.pagesProductsFactory.removePageProd($scope.toRemoveProduct);
         $scope.closeRemoveProductModal();
     }
 
@@ -681,40 +691,22 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         console.log("About to remove: ", product);
     };
 
-    $scope.deleteSingleProductFromPage = function( product ){
-        $scope.removeProductFromCurrent( product );
-        $scope.removeProductFromPage( product, $scope.currentPage.ID );
-    }
-
-    $scope.removeProductFromCurrent = function( prodPageInfo ){
-        var result = false;
-        $scope.currentProducts.find(function( productCurr, index ){
-            if ( productCurr.prodID == prodPageInfo.prodID ){
-                $scope.currentProducts.splice(index, 1);
-                result = true;
-                return true;
-            }
-            return false;
-        });
-        return result;
-    };
-
-    $scope.removeProductFromPage = function( prodPageInfo, pageID ){
-        var result = false;
-        $scope.productsFinalPage.find(function( prodCurr, index ){
-            if ( prodCurr.prodID == prodPageInfo.prodID && prodCurr.pageID == pageID ){
-                $scope.productsFinalPage.splice(index, 1);
-                result = true;
-                return true;
-            }
-            return false;
-        });
-        return result;
-    };
-
     $scope.insertSingleProduct = function( product ){
-        $scope.addProductToCurrents( product );
-        $scope.addProductToPage( product, $scope.currentPage.ID );
+        var rel = {
+            prodID: product.ID,
+            pageID: $scope.currentPage.ID,
+            name: product.name,
+            decription: '',
+            image: '',
+            visibility: true,
+            use_prod_name: true,
+            use_prod_description: true,
+            use_prod_image: true,
+            product_object: product,
+            position: $scope.currentProducts.length,
+        };
+        $scope.pagesProductsFactory.addPageProduct(rel);
+        console.log($scope.currentProducts);
     }
 
     /*$scope.insertProducts = function(){

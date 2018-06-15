@@ -18,6 +18,26 @@ function findAndRemove( arr, funct ){
         arr.splice(index, 1);
 }
 
+if (!Array.prototype.findAndRemove) {
+    Array.prototype.findAndRemove = function(funct) {
+        var index = false;
+        var result = null;
+        this.find(function(elem, idx){
+            console.log(elem, idx);
+            if( funct(elem) ){
+                console.log("Es este!");
+                index = idx;
+                result = elem;
+                return true;
+            }
+            return false
+        });
+        if ( result )
+            this.splice(index, 1);
+        return result;
+    }
+}
+
 panelProductos.config(['$routeProvider', '$locationProvider',
     function( $routeProvider, $locationProvider){
         $routeProvider

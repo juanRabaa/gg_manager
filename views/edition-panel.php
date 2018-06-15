@@ -257,7 +257,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                             </label>
                         </div>
                         <div disabled ng-if="pageProductInfo.use_prod_image" rb-wp-gallery rb-wp-gallery-name="Imagen"
-                        rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
+                        rb-wp-gallery-placeholder="{{pageProductInfo.product_object.image}}"></div>
                         <div ng-if="!pageProductInfo.use_prod_image" ng-model="pageProductInfo.image" rb-wp-gallery rb-wp-gallery-name="Imagen" rb-wp-gallery-button="Cambiar imagen"
                         rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
 
@@ -297,7 +297,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                             <input type="text" ng-model="productSearchForm.query">
                             <label ng-class="{active: productSearchForm.query}">Buscar producto</label>
                         </div>
-                        <li class="product-to-add" ng-repeat="product in productsTrunk | filter : {'name' : productSearchForm.query}
+                        <li class="product-to-add" ng-repeat="product in productsFactory.products | filter : {'name' : productSearchForm.query}
                         | orderBy:'name' | filter : productsToAddFilter ">
                             <i ng-click="insertSingleProduct(product)" class="fas fa-plus remove-prod-placeholder btn gg-green-background waves-effect waves-light"></i>
                             <img class="responsive-img product-image" src="{{product.image}}"/>
@@ -352,18 +352,14 @@ $img_dir = $page_creator_dir . "/assets/img";
         </div>
     </div>
 </div>
-<!-- 
+
 <script type="text/ng-template"  id="tree_item_renderer.html">
     {{data.name}}
     <ul>
-        <li ng-repeat="data in data.childPagesObj" ng-include="'tree_item_renderer.html'"></li>
+        <li ng-repeat="data in data.childPagesObj" ng-class="{active: currentPage.ID == data.ID}" ng-include="'tree_item_renderer.html'"></li>
     </ul>
 </script>
 
 <ul>
-    <li ng-repeat="data in pagesTree" ng-include="'tree_item_renderer.html'"></li>
+    <li ng-repeat="data in basePage.childPagesObj" ng-class="{active: currentPage.ID == data.ID}" ng-include="'tree_item_renderer.html'"></li>
 </ul>
-
-<div id="pages-tree">
-
-</div> -->

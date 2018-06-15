@@ -1,8 +1,15 @@
-panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', function($http, errorsManager) {
+panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', 'productsFactory', function($http, errorsManager, productsFactory) {
     var pagesProductsFactory = {
         products: [],
         error: false,
         loading: true,
+        sanitazeProduct: function( prod ){
+            prod.product_object = productsFactory.getProductByID(prod.prodID);
+            prod.use_prod_name = parseInt(prod.use_prod_name) == true;
+            prod.use_prod_image = parseInt(prod.use_prod_image) == true;
+            prod.use_prod_description = parseInt(prod.use_prod_description) == true;
+            return prod;
+        },
         updateProducts: function(){
             this.loading = true;
             var _this = this;
@@ -11,7 +18,8 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', functi
                     console.log(result.data);
                     result.data.forEach(function( productPageRelation ){
                         var pageID = productPageRelation.pageID;
-                        var prodID = productPageRelation.prodID;
+                        _this.sanitazeProduct(productPageRelation);
+                        console.log(productPageRelation);
                         if( !_this.products[pageID] )
                             _this.products[pageID] = [productPageRelation];
                         else
@@ -20,16 +28,67 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', functi
                 }
                 _this.loading = false;
             }).catch(function(e){
+                var error = e;
+                if ( typeof(e) == "object" && e.data )
+                    error = e.data.message;
                 errorsManager.errorOcurred = {
                     description: "No se pudieron cargar los productos de las paginas",
-                    reason: "Mensaje: " + e.data.message,
+                    reason: "Mensaje: " + error,
                 };
                 _this.error = e;
-                _this.loading = false;
+                //_this.loading = false;
             });
         },
         getProductsFrom: function(pageID){
+            if ( !this.products[pageID] )
+                this.products[pageID] = [];
             return this.products[pageID];
+        },
+        addPageProduct: function( pageProd, callback){
+            console.log("To add: ", pageProd);
+            var pagesProductsFactory = this;
+            var url = templateUrl + '/wp-json/gg/v1/fpages/add';
+            var config = {
+                method: 'POST',
+                url: url,
+                data: pageProd,
+                savingNiceInfo: "Agregando: " + pageProd.prodID,
+            };
+            $http(config).then(function(result){
+                console.log(result);
+                var error = result.data.last_error;
+                if ( error == "" ){
+                    pagesProductsFactory.products[pageProd.pageID].push( pageProd );
+                    Materialize.toast(pageProd.prodID + " agregado!", 5000);
+                }
+                else
+                    Materialize.toast("Error al agregar el producto: " + result.data.last_error, 10000);
+                callback(result);
+            });
+        },
+        removePageProd: function( pageProd, callback){
+            console.log("To remove: ", pageProd);
+            var pagesProductsFactory = this;
+            var url = templateUrl + '/wp-json/gg/v1/fpages/delete';
+            var config = {
+                method: 'POST',
+                url: url,
+                data: pageProd,
+                savingNiceInfo: "Removing: " + pageProd.prodID,
+            };
+            $http(config).then(function(result){
+                console.log(result);
+                var error = result.data.last_error;
+                if ( error == "" ){
+                    var result = pagesProductsFactory.products[pageProd.pageID].findAndRemove( pp => pp.prodID == pageProd.prodID );
+                    console.log(result);
+                    if(result)
+                        Materialize.toast(pageProd.pageID + " eliminado!", 5000);
+                }
+                else
+                    Materialize.toast("Error al eliminar el producto: " + result.data.last_error, 10000);
+                callback(result);
+            });
         },
     };
 
