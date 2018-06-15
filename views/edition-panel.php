@@ -236,44 +236,46 @@ $img_dir = $page_creator_dir . "/assets/img";
                         </div>
         			</div>
         			<div class="rb-collapsible-body collapsible-body product-local-edition">
-                        <div class="visibility-checkbox">
-                            <label>
-                                <input type="checkbox" ng-model="pageProductInfo.use_prod_name" ng-checked="pageProductInfo.use_prod_name">
-                                <span>Usar nombre del producto</span>
-                            </label>
-                        </div>
-                        <div ng-if="pageProductInfo.use_prod_name" input-field>
-                            <input disabled type="text" value="{{pageProductInfo.product_object.name}}">
-                        </div>
-                        <div ng-if="!pageProductInfo.use_prod_name" input-field>
-                            <input type="text" ng-model="pageProductInfo.name">
-                            <label ng-class="{active: pageProductInfo.name}">Nombre</label>
-                        </div>
+                        <form ng-model="pageProductInfo" form-on-change="manageSavingQueue">
+                            <div class="visibility-checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="pageProductInfo.use_prod_name" ng-checked="pageProductInfo.use_prod_name">
+                                    <span>Usar nombre del producto</span>
+                                </label>
+                            </div>
+                            <div ng-if="pageProductInfo.use_prod_name" input-field>
+                                <input disabled type="text" value="{{pageProductInfo.product_object.name}}">
+                            </div>
+                            <div ng-if="!pageProductInfo.use_prod_name" input-field>
+                                <input type="text" ng-model="pageProductInfo.name">
+                                <label ng-class="{active: pageProductInfo.name}">Nombre</label>
+                            </div>
 
-                        <div class="visibility-checkbox">
-                            <label>
-                                <input type="checkbox" ng-model="pageProductInfo.use_prod_image" ng-checked="pageProductInfo.use_prod_image">
-                                <span>Usar image del producto</span>
-                            </label>
-                        </div>
-                        <div disabled ng-if="pageProductInfo.use_prod_image" rb-wp-gallery rb-wp-gallery-name="Imagen"
-                        rb-wp-gallery-placeholder="{{pageProductInfo.product_object.image}}"></div>
-                        <div ng-if="!pageProductInfo.use_prod_image" ng-model="pageProductInfo.image" rb-wp-gallery rb-wp-gallery-name="Imagen" rb-wp-gallery-button="Cambiar imagen"
-                        rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
+                            <div class="visibility-checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="pageProductInfo.use_prod_image" ng-checked="pageProductInfo.use_prod_image">
+                                    <span>Usar image del producto</span>
+                                </label>
+                            </div>
+                            <div disabled ng-if="pageProductInfo.use_prod_image" rb-wp-gallery rb-wp-gallery-name="Imagen"
+                            rb-wp-gallery-placeholder="{{pageProductInfo.product_object.image}}"></div>
+                            <div ng-if="!pageProductInfo.use_prod_image" ng-model="pageProductInfo.image" rb-wp-gallery rb-wp-gallery-name="Imagen" rb-wp-gallery-button="Cambiar imagen"
+                            rb-wp-gallery-placeholder="<?php echo $img_dir . '/placeholder.png'; ?>"></div>
 
-                        <div class="visibility-checkbox">
-                            <label>
-                                <input type="checkbox" ng-model="pageProductInfo.use_prod_description" ng-checked="pageProductInfo.use_prod_description">
-                                <span>Usar descripcion del producto</span>
-                            </label>
-                        </div>
-                        <div ng-if="pageProductInfo.use_prod_description" input-field>
-                            <textarea disabled ng-model="" class="materialize-textarea" value="{{pageProductInfo.product_object.description}}"></textarea>
-                        </div>
-                        <div ng-if="!pageProductInfo.use_prod_description" input-field>
-                            <textarea ng-model="pageProductInfo.description" class="materialize-textarea"></textarea>
-                            <label ng-class="{active: pageProductInfo.description}">Descripcion</label>
-                        </div>
+                            <div class="visibility-checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="pageProductInfo.use_prod_description" ng-checked="pageProductInfo.use_prod_description">
+                                    <span>Usar descripcion del producto</span>
+                                </label>
+                            </div>
+                            <div ng-if="pageProductInfo.use_prod_description" input-field>
+                                <textarea disabled ng-model="" class="materialize-textarea" value="{{pageProductInfo.product_object.description}}"></textarea>
+                            </div>
+                            <div ng-if="!pageProductInfo.use_prod_description" input-field>
+                                <textarea ng-model="pageProductInfo.description" class="materialize-textarea"></textarea>
+                                <label ng-class="{active: pageProductInfo.description}">Descripcion</label>
+                            </div>
+                        </form>
         	        </div>
         		</li>
         	</ul>
@@ -299,7 +301,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                         </div>
                         <li class="product-to-add" ng-repeat="product in productsFactory.products | filter : {'name' : productSearchForm.query}
                         | orderBy:'name' | filter : productsToAddFilter ">
-                            <i ng-click="insertSingleProduct(product)" class="fas fa-plus remove-prod-placeholder btn gg-green-background waves-effect waves-light"></i>
+                            <i ng-click="insertSingleProduct(product, $event)" class="fas fa-plus remove-prod-placeholder btn gg-green-background waves-effect waves-light"></i>
                             <img class="responsive-img product-image" src="{{product.image}}"/>
                             <span class="product-name">{{product.name}}</span>
                         </li>

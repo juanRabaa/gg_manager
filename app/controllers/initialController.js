@@ -429,12 +429,22 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             console.log(savingData);
             if( !savingData.saving ){
                 savingData.saving = true;
-                $scope.pagesFactory.editPage(button, function(result){
-                    var error = result.data.last_error;
-                    if ( error )
-                        console.log("ERROR SAVING DATA", error);
-                    savingData.saving = false;
-                });
+                if ( !button.hasOwnProperty("prodID") ){
+                    $scope.pagesFactory.editPage(button, function(result){
+                        var error = result.data.last_error;
+                        if ( error )
+                            console.log("ERROR SAVING DATA", error);
+                        savingData.saving = false;
+                    });
+                }
+                else {
+                    $scope.pagesProductsFactory.editPageProd(button, function(result){
+                        var error = result.data.last_error;
+                        if ( error )
+                            console.log("ERROR SAVING DATA", error);
+                        savingData.saving = false;
+                    });
+                }
             }
         }, 1200);
 
@@ -516,23 +526,36 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     };
 
     $scope.storeCurrentButtonsOrder = function(){
-        $scope.sortableOptions.oldSorting = $scope.currentButtons.map(button => button.ID);
+        //For final pages (products)
+        if( $scope.currentPage.page_type == "final_page" )
+            $scope.sortableOptions.oldSorting = $scope.currentProducts.map(prod => prod.prodID);
+        else//For categories
+            $scope.sortableOptions.oldSorting = $scope.currentButtons.map(button => button.ID);
         console.log($scope.sortableOptions.oldSorting);
     }
 
     $scope.orderChanged = function(){
-        return $scope.currentButtons.some(function( button, index ){
-            return button.ID != $scope.sortableOptions.oldSorting[index];
-        });
+        //For final pages (products)
+        if( $scope.currentPage.page_type == "final_page" ){
+            return $scope.currentProducts.some(function( prod, index ){
+                return prod.prodID != $scope.sortableOptions.oldSorting[index];
+            });
+        }
+        else{//For categories
+            return $scope.currentButtons.some(function( button, index ){
+                return button.ID != $scope.sortableOptions.oldSorting[index];
+            });
+        }
     }
 
     $scope.sortButtons = function(){
+        //For categories
         if ( $scope.currentPage.page_type != "final_page" ){
             $scope.currentButtons.sort(function (a, b) {
                 return a.position > b.position;
             });
         }
-        else{
+        else{//For final pages (products)
             $scope.currentProducts.sort(function (a, b) {
                 return a.position > b.position;
             });
@@ -549,21 +572,28 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         $scope.changePageEnabled = true;
         $scope.sortableOptions.disabled = true;
         $scope.updateElementsOrder();
-        if($scope.orderChanged())
-            $scope.saveCurrentButtonsOnDB();
+        if($scope.orderChanged()){
+            if ( $scope.currentPage.page_type == "final_page" )
+                $scope.saveCurrentProductsOnDB();
+            else
+                $scope.saveCurrentButtonsOnDB();
+        }
     }
 
     $scope.updateElementsOrder = function(){
-        if ( $scope.currentPage.pageType == "category_page" ){
+        console.log("updating positions of...");
+        if ( $scope.currentPage.page_type == "category_page" ){
+            console.log("categorie buttons");
             for (var index in $scope.currentButtons) {
                 $scope.currentButtons[index].position = index;
             }
         }
-        else if ( $scope.currentPage.pageType == "final_page" ){
-            for (var index in $scope.currentProducts) {
-                $scope.currentProducts[index].position = index;
-                $scope.updateProdPageRelation( $scope.currentProducts[index], $scope.currentPage.ID );
-            }
+        else if ( $scope.currentPage.page_type == "final_page" ){
+            console.log("products");
+            $scope.currentProducts.forEach(function(prod, index){
+                console.log(prod.prodID, index)
+                prod.position = index;
+            });
         }
     }
 
@@ -607,7 +637,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             if ( product.product_object.ID == productID )
                 result = true;
         });
-        console.log(productID, result);
+        //console.log(productID, result);
         return result;
     }
 
@@ -691,7 +721,9 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         console.log("About to remove: ", product);
     };
 
-    $scope.insertSingleProduct = function( product ){
+    $scope.insertSingleProduct = function( product, $event ){
+        if ($event)
+            $($event.currentTarget).addClass("disabled");
         var rel = {
             prodID: product.ID,
             pageID: $scope.currentPage.ID,
@@ -705,7 +737,10 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             product_object: product,
             position: $scope.currentProducts.length,
         };
-        $scope.pagesProductsFactory.addPageProduct(rel);
+        $scope.pagesProductsFactory.addPageProduct(rel, function(){
+            if ($event)
+                $($event.currentTarget).removeClass("disabled");
+        });
         console.log($scope.currentProducts);
     }
 
@@ -836,6 +871,12 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     $scope.saveCurrentButtonsOnDB = function(){
         $scope.currentButtons.forEach(function(buttonData){
             $scope.pagesFactory.editPage( buttonData );
+        });
+    };
+
+    $scope.saveCurrentProductsOnDB = function(){
+        $scope.currentProducts.forEach(function(pageProdData){
+            $scope.pagesProductsFactory.editPageProd(pageProdData);
         });
     };
 

@@ -39,6 +39,12 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', 'produ
                 //_this.loading = false;
             });
         },
+        findProductFrom: function(prodID, pageID){
+            var result = {};
+            if ( !this.products[pageID] )
+                result = this.products[pageID].find(product => product.prodID == prodID);
+            return result;
+        },
         getProductsFrom: function(pageID){
             if ( !this.products[pageID] )
                 this.products[pageID] = [];
@@ -64,6 +70,30 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', 'produ
                 else
                     Materialize.toast("Error al agregar el producto: " + result.data.last_error, 10000);
                 callback(result);
+            });
+        },
+        editPageProd: function( pageProd, callback){
+            console.log("To edit: ", pageProd);
+            var pagesProductsFactory = this;
+            var url = templateUrl + '/wp-json/gg/v1/fpages/edit';
+            var config = {
+                method: 'POST',
+                url: url,
+                data: pageProd,
+                savingNiceInfo: "Editando: " + pageProd.prodID,
+            };
+            $http(config).then(function(result){
+                console.log(result);
+                var error = result.data.last_error;
+                if ( error == "" ){
+                    var product = pagesProductsFactory.findProductFrom(pageProd.prodID, pageProd.pageID);
+                    product = pageProd;
+                    Materialize.toast(pageProd.prodID + " editado!", 5000);
+                }
+                else
+                    Materialize.toast("Error al editar el producto: " + result.data.last_error, 10000);
+                if(callback)
+                    callback(result);
             });
         },
         removePageProd: function( pageProd, callback){
