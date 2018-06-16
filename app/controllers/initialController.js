@@ -6,6 +6,33 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     $scope.pagesProductsFactory = pagesProductsFactory;
     $scope.basePage = $scope.pagesFactory.basePage;
     $scope.productsTrunk = $scope.productsFactory.products;
+    $scope.pagesTree = {
+        activated: false,
+        filters: {
+            name: "",
+            recursiveNameFilter: function(page, index, array){
+                var nameQuery = $scope.pagesTree.filters.name;
+                if( page.name.toLowerCase().includes(nameQuery.toLowerCase()) ){
+                    //console.log("Esta pagina contiene el string buscado", page.name);
+                    return true;
+                }
+                else if(page.childPagesObj){
+                    var recRes = page.childPagesObj.some(function(page){
+                        return $scope.pagesTree.filters.recursiveNameFilter(page);
+                    });
+                    if (recRes)
+                        console.log("Esta pagina tiene un hijo con el string buscado", page.name);
+                    return recRes;
+                }
+                return false;
+            }
+        },
+        changeToPage: function(pageID, $event){
+            $event.stopPropagation();
+            if ( $scope.currentPage.ID != pageID )
+                $scope.changeToPage(pageID, false, true);
+        },
+    }
     console.log($scope.productsTrunk);
     console.log($scope.basePage.childPagesObj);
     //$scope.pagesTree = $scope.pagesFactory.pagesTree();
@@ -419,10 +446,18 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             $timeout.cancel(oldTimeout);
 
         var savingData;
-        if( $scope.savingQueue[button.ID] )
-            savingData = $scope.savingQueue[button.ID];
-        else
-            savingData = $scope.savingQueue[button.ID] = {};
+        if( $scope.savingQueue[button.ID] ){
+            if ( !button.hasOwnProperty("prodID") )
+                savingData = $scope.savingQueue[button.ID];
+            else
+                savingData = $scope.savingQueue[button.prodID];
+        }
+        else{
+            if ( !button.hasOwnProperty("prodID") )
+                savingData = $scope.savingQueue[button.ID] = {};
+            else
+                savingData = $scope.savingQueue[button.prodID] = {};
+        }
 
         savingData.newData = button;
         savingData.timeOut = $timeout(function(){

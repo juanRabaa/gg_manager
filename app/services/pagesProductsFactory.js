@@ -8,6 +8,7 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', 'produ
             prod.use_prod_name = parseInt(prod.use_prod_name) == true;
             prod.use_prod_image = parseInt(prod.use_prod_image) == true;
             prod.use_prod_description = parseInt(prod.use_prod_description) == true;
+            prod.visibility = parseInt(prod.visibility) == true;
             return prod;
         },
         updateProducts: function(){

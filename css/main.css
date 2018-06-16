@@ -681,6 +681,82 @@ i.hover-tilt:hover:before {
 }
 
 /* ========================================================================== */
+/* pages tree */
+/* ========================================================================== */
+#gg-pages-tree {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ffffff;
+    z-index: 1;
+    /* padding-left: 1rem; */
+    height: 100%;
+    display:  flex;
+    align-items:  center;
+    justify-content:  center;
+    overflow: auto;
+    border-left: solid 0.1rem;
+}
+
+#gg-pages-tree ul li {
+    font-size: 1rem;
+    color: #000000;
+    text-shadow:  0px 0px;
+    font-weight: 400;
+}
+
+#gg-pages-tree ul {
+    margin-top:  0;
+    margin-bottom: 0;
+}
+
+#gg-pages-tree > .tree > ul > li {
+    border-bottom: solid 0.1rem grey;
+}
+
+#gg-pages-tree li {
+    margin-bottom: 0;
+}
+
+#gg-pages-tree .trigger {
+    cursor: pointer;
+    /* position:  fixed; */
+    user-select: none;
+    height:  100%;
+    display:  flex;
+    align-items:  center;
+    padding: 0;
+    border-radius: 0;
+}
+
+#gg-pages-tree .tree {
+    align-self:  flex-start;
+    height: 100%;
+    overflow: auto;
+}
+
+#gg-pages-tree ul li.spot-on {
+    color: #26a69a;
+    font-weight:  bold;
+    text-shadow: 0 0 2px #26a69a;
+}
+
+#gg-pages-tree ul li.current {
+    color: #d8b15f;
+    font-weight:  bold;
+    text-shadow: 0 0 2px #d8b15f;
+}
+
+#gg-pages-tree ul li > span {
+    cursor: pointer;
+    user-select: none;
+}
+
+#gg-pages-tree ul li.current > span {
+    cursor: default;
+}
+
+/* ========================================================================== */
 /* Loading */
 /* ========================================================================== */
 .loading-animation .loading-done {

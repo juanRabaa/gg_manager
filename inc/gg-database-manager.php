@@ -213,6 +213,7 @@ class GG_Database_Manager{
 			'name'                   => $request['name'],
 			'description'             => $request['description'],
 			'image'                  => $request['image'],
+            'visibility'              => $request['visibility'],
 			'use_prod_name'          => $request['use_prod_name'],
 			'use_prod_description'   => $request['use_prod_description'],
             'use_prod_image'        => $request['use_prod_image'],

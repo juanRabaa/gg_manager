@@ -40,7 +40,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Ocultar"
                             ng-class=" button.visibility ? 'fa-eye-slash' : 'fa-eye'"
                             class="fas six columns not-collapse edit-button gg-cyan-background btn waves-effect waves-light hover-tilt tooltipped" aria-hidden="true"
-                            ng-click="button.visibility = !button.visibility;"></i>
+                            ng-click="button.visibility = !button.visibility; manageSavingQueue(button)"></i>
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Editar contenido"
                             class="fas fa-pencil-alt six columns not-collapse edit-button gg-green-background btn waves-effect waves-light hover-tilt" aria-hidden="true"
                             ng-click="changeToPage(button.ID, true, true);"></i>
@@ -97,7 +97,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="{{button.visibility ? 'Ocultar' : 'Mostrar'}}"
                             ng-class="button.visibility ? 'fa-eye-slash' : 'fa-eye'"
                             class="fas six columns not-collapse edit-button gg-cyan-background btn waves-effect waves-light hover-tilt tooltipped" aria-hidden="true"
-                            ng-click="button.visibility = !button.visibility;"></i>
+                            ng-click="button.visibility = !button.visibility; manageSavingQueue(button)"></i>
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Editar contenido"
                             class="fas fa-pencil-alt six columns not-collapse edit-button gg-green-background btn waves-effect waves-light hover-tilt" aria-hidden="true"
                             ng-click="changeToPage(button.ID, true, true);"></i>
@@ -229,7 +229,7 @@ $img_dir = $page_creator_dir . "/assets/img";
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Ocultar"
                             ng-class=" pageProductInfo.visibility ? 'fa-eye-slash' : 'fa-eye'"
                             class="fas six columns not-collapse edit-button gg-cyan-background btn waves-effect waves-light hover-tilt tooltipped" aria-hidden="true"
-                            ng-click="pageProductInfo.visibility = !pageProductInfo.visibility ;"></i>
+                            ng-click="pageProductInfo.visibility = !pageProductInfo.visibility; manageSavingQueue(pageProductInfo)"></i>
                             <i tooltipped data-position="top" data-delay="1000" data-tooltip="Borrar"
                             class="fas fa-box-open six columns not-collapse delete-button gg-red-background btn waves-effect waves-light hover-tilt" aria-hidden="true"
                             ng-click="openRemoveProductModal(pageProductInfo)" data-target='removeProductModal' modal open="removeProductOpen"></i>
@@ -353,15 +353,33 @@ $img_dir = $page_creator_dir . "/assets/img";
             </div>
         </div>
     </div>
+
 </div>
-
-<script type="text/ng-template"  id="tree_item_renderer.html">
-    {{data.name}}
-    <ul>
-        <li ng-repeat="data in data.childPagesObj" ng-class="{active: currentPage.ID == data.ID}" ng-include="'tree_item_renderer.html'"></li>
-    </ul>
-</script>
-
-<ul>
-    <li ng-repeat="data in basePage.childPagesObj" ng-class="{active: currentPage.ID == data.ID}" ng-include="'tree_item_renderer.html'"></li>
-</ul>
+<!-- ======================================================================= -->
+<!-- PAGES TREE -->
+<!-- ======================================================================= -->
+<div id="gg-pages-tree">
+    <div class="trigger btn waves gg-golden-background" ng-click="pagesTree.activated = !pagesTree.activated">
+        <i ng-if="!pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Abrir árbol de paginas" >chevron_left</i>
+        <i ng-if="pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Cerrar árbol de paginas" >chevron_right</i>
+    </div>
+    <div ng-if="pagesTree.activated" class="tree">
+        <script type="text/ng-template"  id="tree_item_renderer.html">
+            <span ng-click="pagesTree.changeToPage(data.ID, $event);">{{data.name}}</span>
+            <ul>
+                <li ng-repeat="data in data.childPagesObj | filter : pagesTree.filters.recursiveNameFilter | orderBy:'name'"
+                ng-class="{current: currentPage.ID == data.ID, 'spot-on': pagesTree.filters.name == data.name}" ng-include="'tree_item_renderer.html'"
+                ng-click="changeToPage(data.ID, false, true); $event.stopPropagation();"></li>
+            </ul>
+        </script>
+        <h4>Árbol de paginas</h4>
+        <div input-field>
+            <input autocomplete="new-password" type="text" ng-model="pagesTree.filters.name">
+            <label ng-class="{active: pagesTree.filters.name}">Buscar...</label>
+        </div>
+        <ul>
+            <li ng-repeat="data in basePage.childPagesObj | filter : pagesTree.filters.recursiveNameFilter | orderBy:'name'"
+            ng-class="{current: currentPage.ID == data.ID, 'spot-on': pagesTree.filters.name == data.name}" ng-include="'tree_item_renderer.html'"></li>
+        </ul>
+    </div>
+</div>
