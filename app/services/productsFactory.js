@@ -6,128 +6,19 @@ panelProductos.factory('productsFactory', ['errorsManager', '$http', function(er
         //Gets the products from the DB and store them in the products var
         updateProducts: function () {
             this.loading = true;
-            /*this.products = [
-                {
-                    ID: 'AFTEIG200',
-                    name: "After Eight 200 gramos",
-                    image: "https://www.madewithnestle.ca/sites/default/files/after_eight_300g_1.png",
-                    price_pesos: 60,
-                    description: "Descripcion de los After Eight de 200 gramos. Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AFTEIG300',
-                    name: "After Eight 300 gramos",
-                    image: "http://galagourmet.com.ar/wp-content/uploads/2016/09/Caja-After-Eight.png",
-                    price_pesos: 70,
-                    description: "Aca se describen los de 300 gramos.",
-                    prodPadre: 'AFTEIG200',
-                    enabled: true,
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AFTEIG400',
-                    name: "After Eight 400 gramos",
-                    image: "https://www.nestleprofessional.es/sites/g/files/gfb231/f/styles/product/public/media/aftereight-adaptada.png?itok=gJfenTsl",
-                    description: "Y aca esta la descripcion de los de 400",
-                    price_pesos: 80,
-                    prodPadre: 'AFTEIG200',
-                    enabled: true,
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AERBUBBMINT',
-                    name: "Aero Bubble mint",
-                    image: "https://www.nestleprofessional.co.uk/sites/g/files/gfb191/f/styles/product/public/media/3.3b_aero_mint_bubbles_angle.png?itok=aIlGb1Tu",
-                    price_pesos: 60,
-                    description: "Descripcion. Son ricos :)",
-                    disabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AERMINTBARR',
-                    name: "Aero Mint barra",
-                    image: "http://cdn.shopify.com/s/files/1/1271/3197/products/Mint_Aero_1_grande.png?v=1463340413",
-                    price_pesos: 60,
-                    description: "Descripcion. Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AEROBUBBCLAS',
-                    name: "Aero bubbles",
-                    image: "https://www.jeancoutu.com/catalog-images/836734/viewer/0/nestle-aero-bubbles-pouch-milk-135-g.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'AEROBARRCLAS',
-                    name: "Aero Barra",
-                    image: "https://www.madewithnestle.ca/sites/default/files/aero_milk_42_g.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'BOMBVERGSAMB',
-                    name: "Bombones Vergani Sambuca",
-                    image: "http://galagourmet.com.ar/wp-content/uploads/2017/05/Vergani-praline-crema-Sambuca.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'BOMBVERGRUM',
-                    name: "Bombones Vergani Rum",
-                    image: "http://galagourmet.com.ar/wp-content/uploads/2017/05/Vergani-praline-rum.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'BOMBVERGCREMWSK',
-                    name: "Bombones Vergani Crema Whisky",
-                    image: "http://galagourmet.com.ar/wp-content/uploads/2017/05/Vergani-praline-crema-whisky.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-                {
-                    ID: 'BOMBVERGLIMON',
-                    name: "Bombones Vergani Limoncello",
-                    image: "http://galagourmet.com.ar/wp-content/uploads/2017/05/Vergani-praline-limoncello.png",
-                    price_pesos: 60,
-                    description: "Son ricos :)",
-                    enabled: true,
-                    prodPadre: '',
-                    webVisibility: true,
-                },
-            ];
-            */
             var _this = this;
             $http.get(templateUrl + '/wp-json/gg/v1/products/get/all').then(function(result){
                 _this.products = result.data;
                 _this.loading = false;
                 console.log(_this);
             }).catch(function(e){
+                var errorMessage = e;
+                if ( typeof(e) == "object" && e.data )
+                    errorMessage = e.data.message;
+                console.log(e);
                 errorsManager.errorOcurred = {
                     description: "No se pudieron cargar los productos",
-                    reason: "Mensaje: " + e.data.message,
+                    reason: "Mensaje: " + errorMessage,
                 };;
                 _this.error = e;
             });;

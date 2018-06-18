@@ -5,10 +5,74 @@ $page_creator_dir = get_template_directory_uri() . '/page-creator';
 $img_dir = $page_creator_dir . "/assets/img";
 ?>
 <div id="sortable-effect-background" ng-class="{'sorting-enabled': !sortableOptions.disabled}"></div>
-<div id="gg-page-creator-content" class="container" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
-    <div class="panel-header"> Pagina principal: </div>
-    <div id="current-page" class="container"><span ng-if="!sortableOptions.disabled">Organizando: </span>{{currentPage.name}}</div>
+<!-- =============================================================================
+// BEGGINING SECTION
+// ============================================================================= -->
+<div ng-if="!basePage" id="gg-page-creator-content" class="container beggining-section" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
+    <h4 class="center">Bienvenido al administrador de paginas de Gala Gourmet</h4>
+    <p>En este panel podra organizar las paginas de los productos</p>
+    <p>Aún sin haber asigndado una pagina principal, todavia puede administrar los productos desde la seccion de productos</p>
+    <p>Para comenzar, debe elegir la pagina principal en la cual comenzara la seccion de productos</p>
+    <!-- Modal Trigger -->
+    <div class="btn gg-golden-background waves" data-target='selectBasePage' modal open="selectBasePageModalOpen"
+    ng-click="openSelectBasePageModal()">Elegir pagina principal</div>
+    <!-- Modal Trigger -->
+    <div class="btn gg-golden-background waves" data-target='createBasePage' modal open="createBasepageModalOpen"
+    ng-click="openCreateBasepageModal()">Crear una nueva pagina</div>
+    <!-- ======================================================================= -->
+    <!-- SELECT BASE PAGE -->
+    <!-- ======================================================================= -->
+    <!-- Modal Structure -->
+    <div id="selectBasePage" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4>Crear pagina principal</h4>
+            <p>La pagina que elija usara un template especial, en el cual se mostrara las categorias principales</p>
+            <div class="modal-body container" id="base-page-selection">
+                <ul>
+                    <!-- {{wordpressPages}} -->
+                    <li ng-repeat="wpPage in wordpressPages" ng-click="basePageSelection.selectedPage = wpPage"
+                    ng-class="{'animated-background-color': basePageSelection.selectedPage.ID == wpPage.ID}">{{wpPage.post_title}}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action waves-effect waves-green btn gg-golden-background" ng-click="createBasePageModalConfirmed()">Aceptar</a>
+        </div>
+    </div>
+    <!-- MODAL END -->
+    <!-- ======================================================================= -->
+    <!-- CREATE BASE PAGE -->
+    <!-- ======================================================================= -->
+    <!-- Modal Structure -->
+    <div id="createBasePage" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4>Seleccionar pagina principal</h4>
+            <p>La pagina que elija usara un template especial, en el cual se mostrara las categorias principales</p>
+            <div class="modal-body container" id="base-page-selection">
+                <ul>
+                    <!-- {{wordpressPages}} -->
+                    <li ng-repeat="wpPage in wordpressPages" ng-click="basePageSelection.selectedPage = wpPage"
+                    ng-class="{'animated-background-color': basePageSelection.selectedPage.ID == wpPage.ID}">{{wpPage.post_title}}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action waves-effect waves-green btn gg-golden-background" ng-click="selectBasePageModalConfirmed()">Aceptar</a>
+        </div>
+    </div>
+    <!-- ADD PAGE END -->
+</div>
 
+
+<!-- // =============================================================================
+// PAGES ADMINISTRATION SECTION
+// ============================================================================= -->
+<div ng-if="basePage" id="gg-page-creator-content" class="container" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
+    <div ng-if="currentPage.page_type == 'base_page'" class="panel-header"> Pagina principal: {{basePage.name}}</div>
+    <div id="current-page" class="container"><span ng-if="!sortableOptions.disabled">Organizando: </span>
+        <img ng-if="currentPage.image" class="responsive-img" src="{{currentPage.image}}"/>{{currentPage.name}}
+    </div>
+    <p ng-if="currentPage.description" class="center">{{currentPage.description}}</p>
     <div id="lists-controls">
         <a ng-if="sortableOptions.disabled" ng-show="pagesHistory.length() > 1" class="waves-effect waves-light btn gg-golden-background" ng-click="pagesHistory.goBack()">
              <i class="material-icons">chevron_left</i>
@@ -358,7 +422,7 @@ $img_dir = $page_creator_dir . "/assets/img";
 <!-- ======================================================================= -->
 <!-- PAGES TREE -->
 <!-- ======================================================================= -->
-<div id="gg-pages-tree">
+<div id="gg-pages-tree" ng-if="basePage">
     <div class="trigger btn waves gg-golden-background" ng-click="pagesTree.activated = !pagesTree.activated">
         <i ng-if="!pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Abrir árbol de paginas" >chevron_left</i>
         <i ng-if="pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Cerrar árbol de paginas" >chevron_right</i>

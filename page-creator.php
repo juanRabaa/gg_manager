@@ -1,5 +1,5 @@
 <?php
-	//echo get_site_url(null, '', 'https');
+	echo get_site_url(null, '', 'https');
 ?>
 <script type="text/javascript">
 	var templateUrl = '<?= get_site_url(null, '', 'https'); ?>';

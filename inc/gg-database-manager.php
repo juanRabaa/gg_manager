@@ -124,15 +124,29 @@ class GG_Database_Manager{
     // PAGES
     // =============================================================================
 
-    public function get_pages( $data ) {
+    public function get_pages(WP_REST_Request $request) {
 		global $wpdb;
-		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' ORDER BY name');
+        $order_by = $request["order_by"] ? $request["order_by"] : "position";
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' ORDER BY ' . $order_by);
 	}
 
-    public function get_base_page( $data ) {
+    public function get_page_by_ID(WP_REST_Request $request) {
+        global $wpdb;
+        if ($request['ID'])
+            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE ID="'.$request['ID'].'" LIMIT 1');
+        return null;
+    }
+
+    public function get_base_page(WP_REST_Request $request) {
 		global $wpdb;
 		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE page_type="base_page" LIMIT 1');
 	}
+
+    public function get_first_order_page(WP_REST_Request $request){
+        global $wpdb;
+        $order_by = $request["order_by"] ? $request["order_by"] : "position";
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE parent_ID="A0" ORDER BY ' . $order_by);
+    }
 
     public function add_page( WP_REST_Request $request ) {
 		global $wpdb;

@@ -2,6 +2,10 @@
 require 'inc/rb-wp-rest-api/rb-wp-rest-api.php';
 require 'inc/gg-database-manager.php';
 require 'inc/gg-routes.php';
+$page_creator_dir = get_template_directory_uri() . '/page-creator';
+$img_dir = $page_creator_dir . "/assets/img";
+
+require 'inc/templates-manager.php';
 
 /** Step 2 (from text above). */
 add_action( 'admin_menu', 'my_plugin_menu' );
@@ -13,7 +17,7 @@ function my_plugin_menu() {
 
 /** Step 3. */
 function my_plugin_options() {
-	if ( !current_user_can( 'manage_categories' ) )  {
+	if ( !current_user_can( 'manage_categories' ) || !is_admin() )  {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 
@@ -38,6 +42,7 @@ function my_plugin_options() {
 	wp_localize_script( 'angularJS', 'wordpressData', array(
 	    'themeUrl'            => get_template_directory_uri(),
 		'pageCreatorUrl'	  => get_template_directory_uri() . '/page-creator',
+		'pages'				  => get_pages(),
         'nonce' => wp_create_nonce( 'wp_rest' )
 	) );
     wp_enqueue_script( 'angular-route', 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.9/angular-route.min.js', true );
