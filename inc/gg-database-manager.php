@@ -133,13 +133,20 @@ class GG_Database_Manager{
     public function get_page_by_ID(WP_REST_Request $request) {
         global $wpdb;
         if ($request['ID'])
-            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE ID="'.$request['ID'].'" LIMIT 1');
+            return $wpdb->get_row('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE ID="'.$request['ID'].'" LIMIT 1');
+        return null;
+    }
+
+    public function get_page_childs(WP_REST_Request $request) {
+        global $wpdb;
+        if ($request['ID'])
+            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE parent_ID="'.$request['ID'].'"');
         return null;
     }
 
     public function get_base_page(WP_REST_Request $request) {
 		global $wpdb;
-		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE page_type="base_page" LIMIT 1');
+		return $wpdb->get_row('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE page_type="base_page" LIMIT 1');
 	}
 
     public function get_first_order_page(WP_REST_Request $request){

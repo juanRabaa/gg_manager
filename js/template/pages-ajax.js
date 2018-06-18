@@ -93,6 +93,10 @@ ggPagesNavigation.directive("formOnChange", function($parse){
   }
 });
 
+ggPagesNavigation.factory('pagesFactory', ['$http', '$q', function($http, $q) {
+    var pagesFactory = {}
+    return pagesFactory;
+}]);
 
 ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http', '$timeout', function($scope, $rootScope, $http, $timeout){
     $scope.basePage = {};
@@ -101,24 +105,25 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
     $scope.currentProducts = [];
     $scope.loading = false;
     $scope.error = null;
+    //Stores pages information
     $scope.pagesTrunk = [];
+    //Stores the buttons of loaded pages. [ID => [Childrens]]
     $scope.pagesButtons = [];
     $scope.pagesTree = {};
-    $scope.getMainPages = function(){
-
-    };
 
     $scope.loadingManager = {
         tickets: [],
         startLoading: function(description){
             console.log(description);
             var ticketID = "loading_ticket_n_" + this.tickets.length;
-            this.tickets[ticketID] = description;
+            this.tickets.push({
+                ID: ticketID,
+                description: description,
+            });
             return ticketID;
         },
         endLoading: function(ticketID){
-            console.log(ticketID);
-            return this.tickets.findAndRemove(ticketID);
+            //this.tickets.findAndRemove(ticket => ticket.ID == ticketID );console.log(this);
         },
     }
 
@@ -129,14 +134,23 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
             $scope.pagesTrunk[page.ID] = page;
     };
 
+    $scope.savePageButtons = function(pageID, buttons){
+        if ( !$scope.pagesButtons[pageID] )
+            $scope.pagesButtons[pageID] = buttons;
+    };
+
+    $scope.saveCurrentPage = function(){
+        $scope.savePageInTrunk($scope.currentPage);
+        $scope.savePageButtons($scope.currentPage.ID, $scope.currentButtons);
+    };
+
     //Loads the base page buttons(categories and final pages).
     $scope.loadBasePageButtons = function(){
         var loadingTicket = $scope.loadingManager.startLoading("Loading base page buttons");
-        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/first_order')
+        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/base_page');
         promise.then(function(result){
             if(result.data){
-                result.data.forEach(page => $scope.savePageInTrunk(page));
-                $scope.currentButtons = result.data;
+                $scope.changeToPage(result.data);
             }
             $scope.loadingManager.endLoading(loadingTicket);
         }).catch(function(e){
@@ -166,26 +180,68 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
 
     //Change the current content to the one of the given page
     $scope.changeToPage = function(page){
-        var loadingTicket = $scope.loadingManager.startLoading("Loading page " + page.name);
-
-        if ($scope.pagesButtons[page.ID]){
-            console.log("Esta en el inventario");
-            $scope.currentPage = page;
-            $scope.currentButtons = $scope.pagesButtons[page.ID];
-        }
-        else{
-            console.log("No esta en el inventario");
-            var pageContentPromise = $scope.getPageContent(page);
-            $scope.currentPage = page;
-            pageContentPromise.then(function(result){
-                $scope.currentButtons = result.data;
-            });
-        }
+        $scope.currentPage = page;
+        console.log("Changing to", page);
+        $scope.updateCurrentButtons();
     };
 
     $scope.getPageContent = function(page){
         var loadingTicket = $scope.loadingManager.startLoading("Getting content for " + page.name);
-        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/id/' + page.ID)
+        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/childs/' + page.ID)
+        promise.then(function(result){
+            if(result.data)
+                result.data.forEach(child => child.parentPageObject = page);
+            $scope.loadingManager.endLoading(loadingTicket);
+        }).catch(function(e){
+            $scope.error = e;
+            console.log(e);
+            $scope.loadingManager.endLoading(loadingTicket);
+        });
+        return promise;
+    };
+
+    $scope.goBack = function(){
+        var pageID = $scope.currentPage.parent_ID;
+        var pageInfoPromise = $scope.getPageByID(pageID);
+        console.log(pageInfoPromise);
+        //Si devolvio una pagina
+        if ( pageInfoPromise.ID ){
+            console.log("La pagina estaba guardada");
+            $scope.changeToPage(pageInfoPromise);
+        }
+        else{
+            console.log("La pagina no estaba guardada");
+            pageInfoPromise.then(function(result){
+                console.log(result);
+                $scope.changeToPage(result.data);
+            });
+        }
+    };
+
+    $scope.updateCurrentButtons = function(){
+        console.log("---Updatin current buttons---");
+        if ($scope.pagesButtons[$scope.currentPage.ID]){
+            $scope.currentButtons = $scope.pagesButtons[$scope.currentPage.ID];
+        }
+        else{
+            var loadingTicket = $scope.loadingManager.startLoading("Updating buttons");
+            var pageContentPromise = $scope.getPageContent($scope.currentPage);
+            pageContentPromise.then(function(result){
+                console.log(result);
+                $scope.currentButtons = result.data;
+                $scope.saveCurrentPage();
+                $scope.loadingManager.endLoading(loadingTicket);
+            });
+        }
+    }
+
+    $scope.getPageByID = function(pageID){
+        //product has been loaded already
+        if ($scope.pagesTrunk[pageID])
+            return $scope.pagesTrunk[pageID];
+
+        var loadingTicket = $scope.loadingManager.startLoading("Getting page info of " + pageID);
+        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/id/' + pageID)
         promise.then(function(result){
             $scope.loadingManager.endLoading(loadingTicket);
         }).catch(function(e){
@@ -194,7 +250,7 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
             $scope.loadingManager.endLoading(loadingTicket);
         });
         return promise;
-    }
+    };
 
     $scope.main = function(){
         $scope.loadBasePageButtons();

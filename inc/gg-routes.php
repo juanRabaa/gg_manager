@@ -12,6 +12,7 @@ RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/all', array( 'GG_Database_Mana
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/base_page', array( 'GG_Database_Manager', 'get_base_page' ));
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/first_order', array( 'GG_Database_Manager', 'get_first_order_page' ));
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/id/(?P<ID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_page_by_ID' ));
+RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/childs/(?P<ID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_page_childs' ));
 
 // =============================================================================
 // PAGES PRODUCTS ROUTES

@@ -110,10 +110,18 @@ add_filter('the_content', function( $content ){
     $post_id = get_the_ID();
     if ( is_products_page($post_id) ):
 ?>
-    <div class="products-buttons" ng-app="ggPagesNavigation" ng-controller="pagesNavigation">
-    	<a ng-repeat="page in currentButtons" class="golden-button"  ng-click="changeToPage(page)">
-    		<span class="golden-button-text">{{page.name}}</span>
-    	</a>
+    <div ng-app="ggPagesNavigation" ng-controller="pagesNavigation">
+        <div ng-repeat="ticket in loadingManager.tickets"><span>{{ticket.description}}</span></div>
+        <div>
+            <div class="golden-button go-back" ng-click="goBack()" ng-if="currentPage.page_type != 'base_page'">
+                <i class="fas fa-arrow-left arrow"></i>{{currentPage.parentPageObject.name}}
+            </div>
+        </div>
+        <div class="products-buttons">
+        	<a ng-repeat="page in currentButtons | orderBy : 'position'" class="golden-button"  ng-click="changeToPage(page)">
+        		<span class="golden-button-text">{{page.name}}</span>
+        	</a>
+        </div>
     </div>
 <?php
     else:
