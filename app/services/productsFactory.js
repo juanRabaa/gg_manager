@@ -83,9 +83,7 @@ panelProductos.factory('productsFactory', ['errorsManager', '$http', function(er
         editProduct: function( newProductData ){
             var _this = this;
             console.log("New Data: ", newProductData);
-            $http.post(templateUrl + '/wp-json/gg/v1/products/edit', newProductData, {
-                headers: {'X-WP-Nonce': wpApiSettings.nonce}
-            }).then(function(result){
+            $http.post(templateUrl + '/wp-json/gg/v1/products/edit', newProductData).then(function(result){
                 var error = result.data.last_error;
                 if ( error == "" ){
                     _this.getProductByID( newProductData.ID, function( oldProduct, index, array ){

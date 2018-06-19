@@ -30,6 +30,7 @@ function my_plugin_options() {
 	wp_enqueue_style( "font-awesome-509",	"https://use.fontawesome.com/releases/v5.0.10/css/all.css", array() );
 	wp_enqueue_style( "materialize-css", "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css", array() );
 	wp_enqueue_style( "materialize-icons", "https://fonts.googleapis.com/icon?family=Material+Icons", array() );
+	wp_enqueue_style( "spinners", $page_creator_dir . '/css/spinners.css', array() );
 
 	wp_enqueue_style( "page-creator-css", get_template_directory_uri()."/page-creator/css/main.css", array() );
 	// =============================================================================
@@ -66,6 +67,7 @@ function my_plugin_options() {
     wp_enqueue_script( 'gg-pages-factory', get_template_directory_uri()."/page-creator/app/services/pagesFactory.js", true );
     wp_enqueue_script( 'gg-products-factory', get_template_directory_uri()."/page-creator/app/services/productsFactory.js", true );
 	wp_enqueue_script( 'gg-pages-products-factory', get_template_directory_uri()."/page-creator/app/services/pagesProductsFactory.js", true );
+	wp_enqueue_script( 'gg-producers-manager', get_template_directory_uri()."/page-creator/app/services/producersManager.js", true );
     wp_enqueue_script( 'gg-tabs-managment', get_template_directory_uri()."/page-creator/app/services/tabsManagment.js", true );
     // ============================================================================
     // CONTROLLERS
@@ -73,6 +75,7 @@ function my_plugin_options() {
     wp_enqueue_script( "generalController", get_template_directory_uri()."/page-creator/app/controllers/generalController.js", true );
 	wp_enqueue_script( "initialController", get_template_directory_uri()."/page-creator/app/controllers/initialController.js", true );
 	wp_enqueue_script( "productsManagmentController", get_template_directory_uri()."/page-creator/app/controllers/productsManagment.js", true );
+	wp_enqueue_script( "producersController", get_template_directory_uri()."/page-creator/app/controllers/producersController.js", true );
 	//Angular bootstrap
 	wp_enqueue_script( "angular-bootstrap", get_template_directory_uri()."/page-creator/app/js/angular-bootstrap.js", true );
 	//include( get_template_directory_uri().'/page-creator/page-creator.php' );

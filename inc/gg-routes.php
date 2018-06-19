@@ -18,6 +18,12 @@ RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/childs/(?P<ID>[a-zA-Z0-9-]+)',
 // PAGES PRODUCTS ROUTES
 // =============================================================================
 RB_WP_Rest_API_Extended::get('gg/v1', '/fpages/get/all', array( 'GG_Database_Manager', 'get_fpages_products' ));
+RB_WP_Rest_API_Extended::get('gg/v1', '/fpages/get/parent/(?P<pageID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_fpage_products_by_parent_ID' ));
+
+// =============================================================================
+// PRODUCERS ROUTES
+// =============================================================================
+RB_WP_Rest_API_Extended::get('gg/v1', '/producers/get/all', array( 'GG_Database_Manager', 'get_producers' ));
 
 // =============================================================================
 // ADMINISTRATOR ONLY ROUTES
@@ -44,6 +50,13 @@ RB_WP_Rest_API_Extended::group(['role'   =>  'administrator'], function(){
     RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/add', array( 'GG_Database_Manager', 'add_product_to_page' ));
     RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/edit', array( 'GG_Database_Manager', 'edit_fpage_product' ));
     RB_WP_Rest_API_Extended::post('gg/v1', '/fpages/delete', array( 'GG_Database_Manager', 'delete_fpage_product' ));
+
+    // =============================================================================
+    // PRODUCERS ROUTES
+    // =============================================================================
+    RB_WP_Rest_API_Extended::post('gg/v1', '/producers/add', array( 'GG_Database_Manager', 'add_producer' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/producers/edit', array( 'GG_Database_Manager', 'edit_producer' ));
+    RB_WP_Rest_API_Extended::post('gg/v1', '/producers/delete', array( 'GG_Database_Manager', 'delete_producer' ));
 });
 
 

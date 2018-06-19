@@ -28,6 +28,7 @@ class GG_Database_Manager{
 	const products_table = (self::db_prefix) . 'products';
     const fpages_products_table = (self::db_prefix) . 'fpages_products';
     const pages_table = (self::db_prefix) . 'pages';
+    const producers_table = (self::db_prefix) . 'producers';
 
 	public static function wpdb_products_table(){
 		return (self::wpdb_prefix()) . (self::products_table);
@@ -39,6 +40,10 @@ class GG_Database_Manager{
 
     public static function wpdb_pages_table(){
 		return (self::wpdb_prefix()) . (self::pages_table);
+	}
+
+    public static function wpdb_producers_table(){
+		return (self::wpdb_prefix()) . (self::producers_table);
 	}
 
 	public static function wpdb_prefix(){
@@ -117,7 +122,7 @@ class GG_Database_Manager{
 
     public function get_product_by_ID( $data ) {
 		global $wpdb;
-		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_products_table() . ' WHERE ID = "' . $data['id'] . '"');
+		return $wpdb->get_row('SELECT * FROM ' . self::wpdb_products_table() . ' WHERE ID = "' . $data['id'] . '"');
 	}
 
     // =============================================================================
@@ -210,6 +215,13 @@ class GG_Database_Manager{
 		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_fpages_products_table() . ' ORDER BY name');
 	}
 
+    public function get_fpage_products_by_parent_ID(WP_REST_Request $request) {
+        global $wpdb;
+        if ($request['pageID'])
+            return $wpdb->get_row('SELECT * FROM ' . self::wpdb_fpages_products_table() . ' WHERE pageID="'.$request['pageID'].'"');
+        return null;
+    }
+
     public function add_product_to_page( WP_REST_Request $request ) {
         global $wpdb;
 		$product_page_rel_data = array(
@@ -250,6 +262,56 @@ class GG_Database_Manager{
 		$wpdb->delete(self::wpdb_fpages_products_table(), array('prodID' => $request['prodID'], 'pageID' => $request['pageID'] ));
 		return $wpdb;
 	}
+
+    // =========================================================================
+    // PRODUCTS
+    // =========================================================================
+    public function get_producers(WP_REST_Request $request) {
+		global $wpdb;
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_producers_table() . ' ORDER BY name');
+	}
+
+    public function get_producer_by_ID(WP_REST_Request $request) {
+        global $wpdb;
+        if ($request['ID'])
+            return $wpdb->get_row('SELECT * FROM ' . self::wpdb_producers_table() . ' WHERE ID="'.$request['ID'].'"');
+        return null;
+    }
+
+	public function add_producer( WP_REST_Request $request ) {
+		global $wpdb;
+		$producer_data = array(
+			'ID'   			 	=> $request['ID'],
+			'name'    			=> $request['name'],
+			'information'    	=> $request['information'],
+			'logo'    	        => $request['logo'],
+			'site'    			=> $request['site'],
+		);
+
+		$wpdb->insert(self::wpdb_producers_table(), $producer_data, array('%s','%s','%s','%s','%s'));
+		return $wpdb;
+	}
+
+    public function edit_producer( WP_REST_Request $request ) {
+        global $wpdb;
+		$new_data = array(
+            'name'    			=> $request['name'],
+			'information'    	=> $request['information'],
+			'logo'    	        => $request['logo'],
+			'site'    			=> $request['site'],
+		);
+        $wpdb->update(self::wpdb_producers_table(), $new_data, array('ID' => $request['ID']), array('%s','%s','%s','%s'), array('%s'));
+		return $wpdb;
+	}
+
+    public function delete_producer( WP_REST_Request $request ) {
+        global $wpdb;
+        if($request['ID'])
+		      $wpdb->delete(self::wpdb_producers_table(), array('ID' => $request['ID']), array( '%s' ));
+		return $wpdb;
+	}
+
+
 }
 
 ?>

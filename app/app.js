@@ -52,7 +52,12 @@ panelProductos.config(['$routeProvider', '$locationProvider',
             .when('/products-panel', {
                 templateUrl: wordpressData.pageCreatorUrl + '/views/products-managment-panel.php',
                 controller: 'productsManagmentController'
-            });
+            })
+            .when('/producers-panel', {
+                templateUrl: wordpressData.pageCreatorUrl + '/views/producers-panel.php',
+                controller: 'producersController'
+            })
+        ;
     }
 ]);
 

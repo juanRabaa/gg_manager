@@ -28,11 +28,14 @@
     <div id="gg-page-creator-main">
 		<div id="gg-panel-tabs" class="row">
 		      <ul class="tabs z-depth-1">
-		        <li class="tab col s6">
+		        <li class="tab col s4">
 					<a ng-class="{active: activatedTab == 'paginationController'}" href="#!pagination-panel">Paginas</a>
 				</li>
-		        <li class="tab col s6">
+		        <li class="tab col s4">
 					<a ng-class="{active: activatedTab == 'productsManagmentController'}" href="#!products-panel">Productos</a>
+				</li>
+				<li class="tab col s4">
+					<a ng-class="{active: activatedTab == 'producersController'}" href="#!producers-panel">Fabricantes</a>
 				</li>
 		      </ul>
 		</div>

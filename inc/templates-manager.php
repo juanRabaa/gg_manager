@@ -84,17 +84,15 @@ function smashing_save_post_class_meta( $post_id, $post ) {
 }
 
 
-// =============================================================================
-// Content filter
-// =============================================================================
-/*This part manages what happens when a page has the "products page" meta-box $checked.
-It will replace the content of the page with the buttons and products from the administrator*/
-
-function is_products_page($post_id){
-    return get_post_meta( $post_id, 'gg_products_page_activated', true );
-}
-
 if (!is_admin()) {
+    // =========================================================================
+    // STYLES
+    // =========================================================================
+    wp_enqueue_style( "pages-template", $page_creator_dir . '/css/template/main.css', array() );
+    wp_enqueue_style( "spinners", $page_creator_dir . '/css/spinners.css', array() );
+    // =========================================================================
+    // SCRIPTS
+    // =========================================================================
     wp_enqueue_script( "jquery", "https://code.jquery.com/jquery-3.1.1.min.js", true );
     wp_enqueue_script( 'angularJS', "https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js", array("jquery"), true );
     wp_enqueue_script( 'angular-route', 'https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.9/angular-route.min.js', true );
@@ -106,21 +104,98 @@ if (!is_admin()) {
     ) );
 }
 
-add_filter('the_content', function( $content ){
+// =============================================================================
+// Content filter
+// =============================================================================
+/*This part manages what happens when a page has the "products page" meta-box $checked.
+It will replace the content of the page with the buttons and products from the administrator*/
+function is_products_page($post_id){
+    return get_post_meta( $post_id, 'gg_products_page_activated', true );
+}
+
+add_filter('the_content', function( $content ) use ($page_creator_dir, $img_dir){
     $post_id = get_the_ID();
     if ( is_products_page($post_id) ):
 ?>
-    <div ng-app="ggPagesNavigation" ng-controller="pagesNavigation">
-        <div ng-repeat="ticket in loadingManager.tickets"><span>{{ticket.description}}</span></div>
-        <div>
-            <div class="golden-button go-back" ng-click="goBack()" ng-if="currentPage.page_type != 'base_page'">
-                <i class="fas fa-arrow-left arrow"></i>{{currentPage.parentPageObject.name}}
+    <div ng-app="ggPagesNavigation" ng-controller="pagesNavigation" ng-class="{loading: loadingManager.tickets.length > 0}">
+        <div ng-show="loadingManager.isLoading()" id="gg-loading-box">
+            <sk-cube-grid class="gg-spinner"></sk-cube-grid>
+            <div>
+                <p ng-repeat="ticket in loadingManager.tickets" class="loading-item">
+                    <span class="gg-golden-background dot"></span>{{ticket.description}}
+                </p>
             </div>
         </div>
-        <div class="products-buttons">
-        	<a ng-repeat="page in currentButtons | orderBy : 'position'" class="golden-button"  ng-click="changeToPage(page)">
-        		<span class="golden-button-text">{{page.name}}</span>
-        	</a>
+        <div ng-show="!loadingManager.isLoading()">
+            <div id="loading-info-debug">
+                <div ng-repeat="ticket in loadingManager.tickets"><span>{{ticket.description}}</span></div>
+            </div>
+            <div>
+                <div class="golden-button go-back" ng-click="goBack()" ng-if="currentPage.page_type != 'base_page'">
+                    <i class="fas fa-arrow-left arrow"></i>{{currentPage.parentPageObject.name}}
+                </div>
+            </div>
+            <div ng-if="currentPage.page_type != 'final_page'" id="gg-page-info" class="regular-page-information">
+                <h2 class="title" ng-if="currentPage.name">{{currentPage.name}}</h2>
+                <img class="image" ng-if="currentPage.image" src="{{currentPage.image}}"/>
+                <p class="description" ng-if="currentPage.description">{{currentPage.description}}</p>
+            </div>
+            <!-- BUTTONS -->
+            <div ng-if="currentPage.page_type != 'final_page'">
+                <!-- If there are buttons -->
+                <div ng-if="currentButtons.length > 0">
+                    <!-- NO IMAGE BUTTONS -->
+                    <div class="products-buttons" ng-if="currentPage.buttons_type == 'no_image'">
+                    	<a ng-repeat="page in currentButtons | orderBy : 'position'" class="golden-button"  ng-click="changeToPage(page)">
+                    		<span class="golden-button-text">{{page.name}}</span>
+                    	</a>
+                    </div>
+                    <!-- SIDE IMAGE BUTTONS -->
+                    <div class="products-buttons" ng-if="currentPage.buttons_type == 'side_image'">
+                        <a ng-repeat="page in currentButtons | orderBy : 'position'" class="golden-button image-golden-button" ng-click="changeToPage(page)">
+                            <span class="golden-button-text">{{page.name}}</span>
+                            <div class="golden-button-image-container">
+                                <img src="{{page.image}}"/>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- HUGE IMAGE BUTTONS -->
+                    <div class="products-buttons" ng-if="currentPage.buttons_type == 'huge_image'">
+                        <a ng-repeat="page in currentButtons | orderBy : 'position'" class="golden-button-centered-image" ng-click="changeToPage(page)">
+                            <div class="golden-button-image-container">
+                                <img src="{{page.image}}">
+                            </div>
+                            <div class="golden-button image-golden-button">
+                                <span class="golden-button-text">{{page.name}}</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <!-- No buttons - section under construction -->
+                <div ng-if="currentButtons.length == 0" class="gg-page-under-contruction">
+                    <img src="<?php echo $img_dir; ?>/logo-1.png"/>
+                    <h1>Sección en construcción</h1>
+                </div>
+            </div>
+            <!-- PRODUCTS -->
+            <div ng-if="currentPage.page_type == 'final_page'">
+                <div  id="gg-page-info" class="final-page-information">
+                    <h2 class="title" ng-if="currentPage.name">{{currentPage.name}}</h2>
+                    <img class="image" ng-if="currentPage.image" src="{{currentPage.image}}"/>
+                    <p class="description" ng-if="currentPage.description">{{currentPage.description}}</p>
+                </div>
+                <div ng-if="currentProducts.length > 0" id="page-products" class="row">
+                    <div ng-repeat="product in currentProducts | orderBy : 'position'" class="four columns single-product product-column">
+                        <img class="product-image" src="{{product.image}}"/>
+                        <p class="contenido-prod" style="text-align: center;">{{product.description}}</p>
+                    </div>
+                </div>
+                <!-- No products - section under construction -->
+                <div ng-if="currentProducts.length == 0" class="gg-page-under-contruction">
+                    <img src="<?php echo $img_dir; ?>/logo-1.png"/>
+                    <h1>Sección en construcción</h1>
+                </div>
+            </div>
         </div>
     </div>
 <?php

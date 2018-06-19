@@ -1,0 +1,96 @@
+#loading-info-debug {
+    position:  fixed;
+    top: 0;
+    left:  0;
+    z-index: 100000;
+    background-color: rgba(0,0,0,0.8);
+    width:  100%;
+    border-bottom: solid 0.1rem #24ff00;
+}
+
+.gg-spinner .sk-fading-circle .sk-circle:before {
+    background-color: #d8b15f;
+}
+
+.gg-spinner {
+    width: 100%;
+    display: flex;
+    justify-content:  center;
+    /* position:  absolute; */
+}
+
+.gg-spinner > .sk-fading-circle {
+    width: 20rem;
+    height: 20rem;
+}
+
+.gg-spinner > .sk-cube-grid {
+    width: 10rem;
+    height: 10rem;
+    margin: 5rem;
+}
+
+.gg-spinner .sk-cube-grid .sk-cube {
+    background-color: #d8b15f;
+}
+/* ========================================================================== */
+/* PAGE STYLES*/
+/* ========================================================================== */
+#gg-page-info {
+    margin-bottom: 4rem;
+}
+
+#gg-page-info .title {
+    text-align:  center;
+    font-weight: 600;
+}
+
+.go-back {
+    font-size: 1rem;
+}
+
+#gg-page-info .image {
+    display:  block;
+    margin:  0 auto;
+    max-height: 30rem;
+}
+
+.golden-button.go-back > i {
+    margin-right: 1rem;
+}
+
+.golden-button.go-back {
+    font-size: 1.3rem;
+}
+
+.single-product.product-column > .product-image {
+    max-height: 25rem;
+}
+
+#gg-page-info .description {
+    font-size: 2rem;
+}
+
+.single-product.product-column {
+    text-align: center;
+}
+
+#gg-loading-box {
+    position:  absolute;
+    width:  100%;
+}
+
+.loading-item .dot {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.gg-golden-background {
+    background-color: #d8b15f;
+}
+
+.gg-page-under-contruction {
+    text-align: center;
+}
