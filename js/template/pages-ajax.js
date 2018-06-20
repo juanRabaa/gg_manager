@@ -230,7 +230,7 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
 
     $scope.getPageContent = function(page){
         var loadingTicket = $scope.loadingManager.startLoading("Buscando el contenido de " + page.name);
-        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/childs/' + page.ID)
+        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/pages/get/childs/' + page.ID + "/true");
         promise.then(function(result){
             if(result.data)
                 result.data.forEach(child => child.parentPageObject = page);
@@ -321,7 +321,7 @@ ggPagesNavigation.controller( 'pagesNavigation', ['$scope', '$rootScope', '$http
 
     $scope.getPageProducts = function(page){
         var loadingTicket = $scope.loadingManager.startLoading("Buscando los productos de " + page.name);
-        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/fpages/get/parent/' + page.ID)
+        var promise = $http.get(wordpressData.siteUrl + '/wp-json/gg/v1/fpages/get/parent/' + page.ID + "/true");
         promise.then(function(result){
             if(result.data.length > 0){//Si se encontraron productos
                 console.log(result.data);

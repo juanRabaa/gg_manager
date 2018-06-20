@@ -51,6 +51,40 @@ class GG_Database_Manager{
 		return $wpdb->prefix;
 	}
 
+    // =============================================================================
+    // COMMONS
+    // =============================================================================
+    public function parse_value($value, $type){
+        switch($type){
+            case 'd': $value= intval($value); break;
+            case 's': $value = $value; break;
+            case 'b': $value = filter_var($value, FILTER_VALIDATE_BOOLEAN); break;
+            default: break;
+        }
+        return $value;
+    }
+
+    public function generate_where_clause($conditions = array()){
+        $where_clause = "WHERE ";
+        $first = true;
+        foreach($conditions as $column => $expected){
+            $value = $expected[0];
+            if (isset($value)){
+				$type = count($expected) > 1 ? $expected[1] : false;
+                if($type)
+                    $value = self::parse_value($value, $type);
+                if (!$first){
+                    $where_clause .= "AND ";
+                }
+                else
+                    $first = false;
+                $where_clause .= "$column='$value' ";
+            }
+        }
+		return $where_clause;
+    }
+
+
 	// =============================================================================
 	// DB MANIPULATION
 	// =============================================================================
@@ -132,7 +166,11 @@ class GG_Database_Manager{
     public function get_pages(WP_REST_Request $request) {
 		global $wpdb;
         $order_by = $request["order_by"] ? $request["order_by"] : "position";
-		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' ORDER BY ' . $order_by);
+        $order_by_clause = "ORDER BY '$order_by'";
+        $where_clause = self::generate_where_clause(array(
+            'visibility'    =>  array($request['visibility'],'b'),
+        ));
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . " $where_clause $order_by_clause");
 	}
 
     public function get_page_by_ID(WP_REST_Request $request) {
@@ -144,8 +182,16 @@ class GG_Database_Manager{
 
     public function get_page_childs(WP_REST_Request $request) {
         global $wpdb;
+
+        $order_by = $request["order_by"] ? $request["order_by"] : "position";
+        $order_by_clause = "ORDER BY '$order_by'";
+        $where_clause = self::generate_where_clause(array(
+            'parent_ID'            =>  array($request['ID'],'s'),
+            'visibility'    =>  array($request['visibility'],'b'),
+        ));
+
         if ($request['ID'])
-            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE parent_ID="'.$request['ID'].'"');
+            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . " $where_clause $order_by_clause");
         return null;
     }
 
@@ -156,8 +202,14 @@ class GG_Database_Manager{
 
     public function get_first_order_page(WP_REST_Request $request){
         global $wpdb;
+
         $order_by = $request["order_by"] ? $request["order_by"] : "position";
-		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE parent_ID="A0" ORDER BY ' . $order_by);
+        $order_by_clause = "ORDER BY '$order_by'";
+        $where_clause = self::generate_where_clause(array(
+            'pageID'        =>  array('A0','s'),
+            'visibility'    =>  array($request['visibility'],'b'),
+        ));
+		return $wpdb->get_results('SELECT * FROM ' . self::wpdb_pages_table() . " $where_clause $order_by_clause");
     }
 
     public function add_page( WP_REST_Request $request ) {
@@ -217,9 +269,15 @@ class GG_Database_Manager{
 
     public function get_fpage_products_by_parent_ID(WP_REST_Request $request) {
         global $wpdb;
+
+        $where_clause = self::generate_where_clause(array(
+            'pageID'            =>  array($request['pageID'],'s'),
+            'visibility'    =>  array($request['visibility'],'b'),
+        ));
+
         if ($request['pageID'])
-            return $wpdb->get_row('SELECT * FROM ' . self::wpdb_fpages_products_table() . ' WHERE pageID="'.$request['pageID'].'"');
-        return null;
+            return $wpdb->get_results('SELECT * FROM ' . self::wpdb_fpages_products_table() . " $where_clause");
+        return $visibility;
     }
 
     public function add_product_to_page( WP_REST_Request $request ) {
