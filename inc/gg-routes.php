@@ -8,16 +8,17 @@ RB_WP_Rest_API_Extended::get('gg/v1', '/products/get/id/(?P<id>[a-zA-Z0-9-]+)', 
 // =============================================================================
 // PAGES ROUTES
 // =============================================================================
+// Gets all the pages
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/all', array( 'GG_Database_Manager', 'get_pages' ));
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/all/(?P<visibility>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_pages' ));
-
+// Gets the base page
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/base_page', array( 'GG_Database_Manager', 'get_base_page' ));
-
+// Gets all the pages from the first page
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/first_order', array( 'GG_Database_Manager', 'get_first_order_page' ));
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/first_order/(?P<visibility>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_first_order_page' ));
-
+// Gets a page by ID
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/id/(?P<ID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_page_by_ID' ));
-
+// Gets a page childs pages
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/childs/(?P<ID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_page_childs' ));
 RB_WP_Rest_API_Extended::get('gg/v1', '/pages/get/childs/(?P<ID>[a-zA-Z0-9-]+)/(?P<visibility>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_page_childs' ));
 
