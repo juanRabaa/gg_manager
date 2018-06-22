@@ -122,6 +122,7 @@ panelProductos.factory('pagesProductsFactory', ['$http', 'errorsManager', 'produ
             });
         },
     };
-    
+
+    pagesProductsFactory.updateProducts();
     return pagesProductsFactory;
 }]);
