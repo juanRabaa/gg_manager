@@ -65,7 +65,7 @@ class GG_Database_Manager{
     }
 
     public function generate_where_clause($conditions = array()){
-        $where_clause = "WHERE ";
+        $where_clause = "";
         $first = true;
         foreach($conditions as $column => $expected){
             $value = $expected[0];
@@ -73,12 +73,12 @@ class GG_Database_Manager{
 				$type = count($expected) > 1 ? $expected[1] : false;
                 if($type)
                     $value = self::parse_value($value, $type);
-                if (!$first){
-                    $where_clause .= "AND ";
+                if ($first){
+                    $where_clause .= "WHERE $column='$value' ";
+                    $first = false;
                 }
                 else
-                    $first = false;
-                $where_clause .= "$column='$value' ";
+                    $where_clause .= "AND $column='$value' ";
             }
         }
 		return $where_clause;
@@ -88,6 +88,60 @@ class GG_Database_Manager{
 	// =============================================================================
 	// DB MANIPULATION
 	// =============================================================================
+    // =========================================================================
+    // WP_PAGES
+    // =========================================================================
+    public function sanitaze_WP_page(&$WP_page){
+        $WP_page->id = $WP_page->ID;
+        unset($WP_page->ID);
+        $WP_page->meta = get_post_meta($WP_page->id);
+        return $WP_page;
+    }
+
+    public function get_WP_pages(WP_REST_Request $request = null) {
+        $pages = get_pages();
+        if($pages){
+            foreach( $pages as $page ){
+                self::sanitaze_WP_page($page);
+            }
+        }
+        return $pages;
+    }
+
+    public function get_WP_pages_tree(WP_REST_Request $request = null) {
+        $pages = self::get_WP_pages($request);
+        $parent_page_key = null;
+        function add_childs(&$the_page, $pages){
+            foreach( $pages as $page_key => $page ){
+                if($page->post_parent == $the_page->id){//si es hijo
+                    if(!$the_page->child_pages)//si no tiene ningun hijo
+                        $the_page->child_pages = array();//defino el array de hijos
+                    array_push($the_page->child_pages, $page);//le agrego el hijo
+                    unset($pages[$page_key]);//elimino al hijo del array principal
+                }
+            }
+            return $the_page;
+        }
+        function add_child_to_pages(&$pages){
+            foreach( $pages as $page_key => $page ){
+                $page = add_childs($page, $pages);//le agrego los hijos
+                if($the_page->child_pages)//si tiene hijos
+                    add_child_to_pages($the_page->child_pages);//le agrego los hijos a los hijos
+            }
+            return $pages;
+        }
+
+        add_child_to_pages($pages);
+        return $pages;
+    }
+
+    public function get_WP_by_ID(WP_REST_Request $request = null) {
+        $page = get_post($request['ID']);
+        if($page)
+            self::sanitaze_WP_page($page);
+        return $page;
+    }
+
     // =========================================================================
     // PRODUCTS
     // =========================================================================
@@ -195,7 +249,7 @@ class GG_Database_Manager{
         return null;
     }
 
-    public function get_base_page(WP_REST_Request $request) {
+    public function get_base_page(WP_REST_Request $request = null) {
 		global $wpdb;
 		return $wpdb->get_row('SELECT * FROM ' . self::wpdb_pages_table() . ' WHERE page_type="base_page" LIMIT 1');
 	}
@@ -222,13 +276,14 @@ class GG_Database_Manager{
 			'description'    	=> $request['description'],
 			'buttons_type'    	=> $buttons_type,
 			'page_type'    		=> $request['page_type'],
-			'image'	             => $request['image'],
+			'image'	            => $request['image'],
 			'visibility'    	=> 1,
             'position'    		=> $request['position'],
             'parent_ID'    		=> $request['parent_ID'],
+            'wp_page_ID'    	=> $request['wp_page_ID'],
 		);
 
-		$wpdb->insert(self::wpdb_pages_table(), $page_data, array('%s','%s','%s','%s','%s','%s','%d','%d','%s'));
+		$wpdb->insert(self::wpdb_pages_table(), $page_data, array('%s','%s','%s','%s','%s','%s','%d','%d','%s','%s'));
 		return $wpdb;
 	}
 
@@ -242,19 +297,20 @@ class GG_Database_Manager{
 		global $wpdb;
         $buttons_type = $request['page_type'] == 'final_page' ? "" : $request['buttons_type'];
 
-		$page_data = array(
+        $page_data = array(
 			'name'    			=> $request['name'],
 			'description'    	=> $request['description'],
 			'buttons_type'    	=> $buttons_type,
 			'page_type'    		=> $request['page_type'],
 			'image'	            => $request['image'],
-			'visibility'    	=> $request['visibility'],
+			'visibility'    	=> 1,
             'position'    		=> $request['position'],
             'parent_ID'    		=> $request['parent_ID'],
+            'wp_page_ID'    	=> $request['wp_page_ID'],
 		);
 
 		$wpdb->update(self::wpdb_pages_table(), $page_data, array('ID' => $request['ID']),
-            array('%s','%s','%s','%s','%s','%d','%d','%s'),array( '%s' )
+            array('%s','%s','%s','%s','%s','%d','%d','%s','%s'),array( '%s' )
         );
 		return $wpdb;
 	}

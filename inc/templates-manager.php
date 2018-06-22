@@ -110,7 +110,8 @@ if (!is_admin()) {
 /*This part manages what happens when a page has the "products page" meta-box $checked.
 It will replace the content of the page with the buttons and products from the administrator*/
 function is_products_page($post_id){
-    return get_post_meta( $post_id, 'gg_products_page_activated', true );
+    //return get_post_meta( $post_id, 'gg_products_page_activated', true );
+    return GG_Database_Manager::get_base_page()->wp_page_ID == $post_id;
 }
 
 add_filter('the_content', function( $content ) use ($page_creator_dir, $img_dir){

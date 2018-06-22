@@ -8,7 +8,7 @@ $img_dir = $page_creator_dir . "/assets/img";
 <!-- =============================================================================
 // BEGGINING SECTION
 // ============================================================================= -->
-<div ng-if="!basePage" id="gg-page-creator-content" class="container beggining-section" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
+<div ng-if="!pagesFactory.basePage.wp_page_ID" id="gg-page-creator-content" class="container beggining-section" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
     <h4 class="center">Bienvenido al administrador de paginas de Gala Gourmet</h4>
     <p>En este panel podra organizar las paginas de los productos</p>
     <p>Aún sin haber asigndado una pagina principal, todavia puede administrar los productos desde la seccion de productos</p>
@@ -23,7 +23,7 @@ $img_dir = $page_creator_dir . "/assets/img";
     <!-- SELECT BASE PAGE -->
     <!-- ======================================================================= -->
     <!-- Modal Structure -->
-    <div id="selectBasePage" class="modal modal-fixed-footer">
+    <div id="createBasePage" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4>Crear pagina principal</h4>
             <p>La pagina que elija usara un template especial, en el cual se mostrara las categorias principales</p>
@@ -44,7 +44,7 @@ $img_dir = $page_creator_dir . "/assets/img";
     <!-- CREATE BASE PAGE -->
     <!-- ======================================================================= -->
     <!-- Modal Structure -->
-    <div id="createBasePage" class="modal modal-fixed-footer">
+    <div id="selectBasePage" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4>Seleccionar pagina principal</h4>
             <p>La pagina que elija usara un template especial, en el cual se mostrara las categorias principales</p>
@@ -63,20 +63,50 @@ $img_dir = $page_creator_dir . "/assets/img";
     <!-- ADD PAGE END -->
 </div>
 
+<!-- // =============================================================================
+// LOST PAGES ADMINISTRATION
+// ============================================================================= -->
+<div id="gg-lost-pages" ng-if="pagesFactory.basePage.wp_page_ID && pagesFactory.pagesNotRelatedWithWpPages.length > 0">
+    <h1 class="center">Ups!</h1>
+    <p>No se encontraron la pagina de wordpress de algunas de las categorías</p>
+    <p>Si hay paginas hijas que tambien se encuentren en esta situacion, se actualizaran al actualizar el padre</p>
+    <p>Seleccione que quiere hacer con estas paginas, si el error persiste, o tiene alguna duda, comuníquese con soporte</p>
+    <h4 class="center">Paginas</h1>
+    <div class="general-controls row center">
+        <div class="six columns btn gg-green-background btn waves-effect waves-light hover-tilt" ng-click="generateAllLostPages()">Agregar todas</div>
+        <div class="six columns btn gg-red-background btn waves-effect waves-light hover-tilt">Borrar todas</div>
+    </div>
+    <ul id="lost-pages-list" class="golden-list">
+        <li class="row" ng-repeat="page in pagesFactory.pagesNotRelatedWithWpPages" ng-if="!pagesFactory.isNotRelatedChild(page)">
+            <div class="six columns">{{page.name}}</div>
+            <div class="six columns controls">
+                <i tooltipped data-position="top" data-delay="1000" data-tooltip="Generar pagina"
+                class="fas fa-check six columns not-collapse gg-green-background btn waves-effect waves-light hover-tilt"
+                ng-click="generatePagesRecursively(page);"></i>
+                <i tooltipped data-position="top" data-delay="1000" data-tooltip="Borrar"
+                class="fas fa-trash six columns not-collapse delete-button gg-red-background btn waves-effect waves-light hover-tilt"
+                ng-click="deleteButton(page)" data-target='removeButtonModal' modal open="removeButtonOpen"></i>
+            </div>
+        </li>
+    </ul>
+</div>
 
 <!-- // =============================================================================
 // PAGES ADMINISTRATION SECTION
 // ============================================================================= -->
-<div ng-if="basePage" id="gg-page-creator-content" class="container" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
-    <div ng-if="currentPage.page_type == 'base_page'" class="panel-header"> Pagina principal: {{basePage.name}}</div>
+<div ng-if="pagesFactory.basePage.wp_page_ID && pagesFactory.pagesNotRelatedWithWpPages.length == 0" id="gg-page-creator-content" class="container" ng-class="{'sorting-enabled': !sortableOptions.disabled}">
+    <div id="top-controlls">
+        <a ng-if="currentPage.page_type == 'final_page'" class="modal-action waves-effect waves-green btn gg-golden-background">Diseño</a>
+    </div>
+    <!-- <div ng-if="currentPage.page_type == 'base_page'" class="panel-header"> Pagina principal: {{basePage.name}}</div> -->
     <div id="current-page" class="container"><span ng-if="!sortableOptions.disabled">Organizando: </span>
         <img ng-if="currentPage.image" class="responsive-img" src="{{currentPage.image}}"/>{{currentPage.name}}
     </div>
     <p ng-if="currentPage.description" class="center">{{currentPage.description}}</p>
     <div id="lists-controls">
-        <a ng-if="sortableOptions.disabled" ng-show="pagesHistory.length() > 1" class="waves-effect waves-light btn gg-golden-background" ng-click="pagesHistory.goBack()">
+        <a ng-if="sortableOptions.disabled" ng-show="currentPage.parentPageObject" class="waves-effect waves-light btn gg-golden-background" ng-click="goBack()">
              <i class="material-icons">chevron_left</i>
-             <span>{{pagesHistory.history[pagesHistory.length() - 2].name}}</span>
+             <span>{{currentPage.parentPageObject.name}}</span>
         </a>
         <i ng-if="sortableOptions.disabled" id="sort-lists-button" class="fas fa-sort btn waves-effect waves-light gg-golden-background"
         tooltipped data-position="top" data-delay="1000" data-tooltip="Reorganizar" ng-click="enableSorting()"></i>
@@ -422,7 +452,7 @@ $img_dir = $page_creator_dir . "/assets/img";
 <!-- ======================================================================= -->
 <!-- PAGES TREE -->
 <!-- ======================================================================= -->
-<div id="gg-pages-tree" ng-if="basePage">
+<div id="gg-pages-tree" ng-if="pagesFactory.basePage.wp_page_ID && pagesFactory.pagesNotRelatedWithWpPages.length == 0">
     <div class="trigger btn waves gg-golden-background" ng-click="pagesTree.activated = !pagesTree.activated">
         <i ng-if="!pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Abrir árbol de paginas" >chevron_left</i>
         <i ng-if="pagesTree.activated" class="material-icons" tooltipped data-position="top" data-delay="400" data-tooltip="Cerrar árbol de paginas" >chevron_right</i>
@@ -442,7 +472,7 @@ $img_dir = $page_creator_dir . "/assets/img";
             <label ng-class="{active: pagesTree.filters.name}">Buscar...</label>
         </div>
         <ul>
-            <li ng-repeat="data in basePage.childPagesObj | filter : pagesTree.filters.recursiveNameFilter | orderBy:'name'"
+            <li ng-repeat="data in pagesFactory.basePage.childPagesObj | filter : pagesTree.filters.recursiveNameFilter | orderBy:'name'"
             ng-class="{current: currentPage.ID == data.ID, 'spot-on': pagesTree.filters.name == data.name}" ng-include="'tree_item_renderer.html'"></li>
         </ul>
     </div>

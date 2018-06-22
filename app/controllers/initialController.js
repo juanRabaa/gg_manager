@@ -1,5 +1,6 @@
 panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http', 'tabsManagment', 'productsFactory', 'pagesFactory', 'pagesProductsFactory',
-'$timeout', function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, pagesProductsFactory, $timeout){
+'$timeout', 'wordpressPagesManager', function($scope, $rootScope, $http, tabsManagment, productsFactory, pagesFactory, pagesProductsFactory, $timeout,
+wordpressPagesManager){
     $scope.controllerName = "paginationController";
     $scope.pagesFactory = pagesFactory;
     $scope.productsFactory = productsFactory;
@@ -8,6 +9,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
     $scope.productsTrunk = $scope.productsFactory.products;
 
     $scope.wordpressPages = wordpressData.pages;
+    $scope.wordpressPagesManager = wordpressPagesManager;
 
     $scope.basePageSelection = {
         selectedPage: {},
@@ -37,10 +39,10 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         changeToPage: function(pageID, $event){
             $event.stopPropagation();
             if ( $scope.currentPage.ID != pageID )
-                $scope.changeToPage(pageID, false, true);
+                $scope.changeToPage(pageID, false);
         },
     }
-    console.log($scope.productsTrunk);
+    //console.log($scope.productsTrunk);
     //$scope.pagesTree = $scope.pagesFactory.pagesTree();
 
     tabsManagment.activateTab( $rootScope, 'paginationController');
@@ -109,7 +111,9 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
                         var error = result.data.last_error;
                         if ( error )
                             console.log("ERROR SAVING DATA", error);
-                        savingData.saving = false;
+                        $scope.updateButtonWordpressPage(button).then(function(result){
+                            savingData.saving = false;
+                        });
                     });
                 }
                 else {
@@ -137,25 +141,8 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
 
     $scope.newButton = {}
 
-    $scope.pagesHistory = {
-        history: [],
-        length: function(){
-            return this.history.length;
-        },
-        goBack: function(){
-            var buttonID = this.history[ this.history.length - 2 ].ID;
-            if ( buttonID ){
-                $scope.changeToPage( buttonID );
-                this.history.pop();
-            }
-        },
-        addPage: function( page ){
-            this.history.push({
-                ID: page.ID,
-                name: page.name,
-                description: page.description,
-            });
-        }
+    $scope.goBack = function(){
+        $scope.changeToPage( $scope.currentPage.parentPageObject.ID );
     };
 
     $scope.changePageEnabled = true;
@@ -192,7 +179,11 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
 
     $scope.selectBasePageModalConfirmed = function(){
         $scope.closeSelectBasePageModal();
-    }
+        var basePage = Object.assign({}, $scope.pagesFactory.basePage);
+        basePage.wp_page_ID = $scope.basePageSelection.selectedPage.ID;
+        $scope.pagesFactory.editPage(basePage);
+        console.log(basePage);
+    };
 
     $scope.createBasePageModalOpen = false;
 
@@ -206,7 +197,94 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
 
     $scope.createBasePageModalConfirmed = function(){
         $scope.closeSelectBasePageModal();
-    }
+    };
+
+    // =========================================================================
+    // LOST PAGES
+    // =========================================================================
+    $scope.lostPages = {
+        filtered: [],
+        filteredPages: function(){
+            return $scope.pagesFactory.pagesNotRelatedWithWpPages.map(function(page){
+                console.log(page);
+                return !$scope.pagesFactory.isNotRelatedChild(page);
+            });
+        },
+    };
+
+    $scope.generatePageFor = function(page, checkChilds){
+        console.log(page.parentPageObject.wpPage);
+        var pageData = {
+            title:  page.name,
+            excerpt: page.description,
+            parent: page.parentPageObject.wpPage.id,
+            status: 'publish',
+            meta: {
+                gg_page_ID: page.ID,
+            },
+        };
+        console.log(pageData);
+        var creationPromise = $scope.wordpressPagesManager.createPage(pageData);
+        creationPromise.then(function(result){//termina de crearse la pagina
+            $scope.pagesFactory.removePageFromLosts(page);
+            console.log(result.data);
+            if(result.data){
+                page.wp_page_ID = result.data.id;//Le asignamos la nueva id de la WP_Page a la pagina
+                page.wpPage = result.data;
+                $scope.pagesFactory.editPage(page).then(function(result){
+                    console.log(result.data);
+                }).catch(function(e){
+                    console.log(e);
+                });//update
+                if(checkChilds && page.childPagesObj){//Si tiene hijos
+                    page.childPagesObj.forEach(function(child){
+                        if(child.wpPage){//Si el hijo esta relacionado a una WP_Page
+                            var pageData = {
+                                id: child.wpPage.id,
+                                parent: page.wpPage.id,//le asigno el nuevo padre
+                            }
+                            $scope.wordpressPagesManager.editPage(pageData);//actualizo
+                        }
+                    });
+                }
+            }
+        });
+        return creationPromise;
+    };
+
+    $scope.generatePagesRecursively = function(parentPage){
+        console.log("-----Comienza la generacion para " + parentPage.name + "-----");
+        if(!parentPage.wpPage){//Si no esta relacionada con una WP_Page
+            console.log("No esta relacionada con un WP_Page", "Se procede a crear la pagina");
+            var creationPromise = $scope.generatePageFor(parentPage, true);//Crea la pagina
+            creationPromise.then(function(result){//Al finalizar creacion...
+                console.log("Termino la creacion");
+                if(parentPage.childPagesObj){//Si tiene hijos
+                    parentPage.childPagesObj.forEach(function(page){
+                        if($scope.pagesFactory.isNotRelated(page))//Si el hijo es una pagina perdida
+                            $scope.generatePagesRecursively(page);//Se repite el proceso con el hijo
+                    })
+                }
+            }).catch(function(e){console.log(e)});
+        }
+    };
+
+    $scope.generateAllLostPages = function(){
+        $scope.lostPages.filteredPages().forEach(function(page){
+            $scope.generatePagesRecursively(page);
+        });
+    };
+
+    $scope.updateButtonWordpressPage = function(button){
+        button.wpPage.title = button.name;
+        if(button.visibility == true)
+            button.wpPage.status = "publish";
+        else
+            button.wpPage.status = "draft";
+
+        return $scope.wordpressPagesManager.editPage(button.wpPage);
+    };
+
     // =========================================================================
     // METHODS
     // =========================================================================
@@ -628,7 +706,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
         });
     };
 
-    $scope.changeToPage = function( buttonID, searchOnCurrentButtons, addToHistory ){
+    $scope.changeToPage = function( buttonID, searchOnCurrentButtons ){
         if ( $scope.changePageEnabled ){
             //$("#buttons-holder").slideUp(1);
 
@@ -644,12 +722,7 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
 
             //$("#buttons-holder").slideDown();
 
-            if( addToHistory ){
-                console.log("Adding " + $scope.currentPage.name + " to history");
-                $scope.pagesHistory.addPage($scope.currentPage);
-            }
             $scope.onPageLoad();
-            console.log($scope.pagesHistory.history);
         }
     }
 
@@ -658,7 +731,6 @@ panelProductos.controller( 'productoController', ['$scope', '$rootScope', '$http
             $scope.currentPage = $scope.pagesFactory.getBasePage();
             if($scope.currentPage){
                 console.log($scope.currentPage);
-                $scope.pagesHistory.addPage($scope.currentPage);
                 $scope.updateCurrentButtons();
                 $scope.onPageLoad();
             }

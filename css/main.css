@@ -892,6 +892,23 @@ i.hover-tilt:hover:before {
     -moz-animation: Gradient 5s ease infinite;
     animation: Gradient 5s ease infinite;
 }
+
+.golden-list > li:nth-child(even) {
+    background-color: #d8b15f5e;
+}
+
+.golden-list > li {
+    margin-bottom: 0;
+    padding: 0.7rem 0;
+    display:  flex;
+    align-items:  center;
+}
+
+.general-controls > div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* ========================================================================== */
 /* PRODUCTS MANAGMENT */
 /* ========================================================================== */
@@ -926,7 +943,7 @@ i.hover-tilt:hover:before {
     padding: 0 0.2rem;
 }
 
-.product-item-controls > i {
+.product-item-controls > i, .controls > i{
     display:  flex;
     align-items:  center;
     justify-content:  center;

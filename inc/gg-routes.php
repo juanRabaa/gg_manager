@@ -1,5 +1,12 @@
 <?php
 // =============================================================================
+// WP_PAGES
+// =============================================================================
+RB_WP_Rest_API_Extended::get('gg/v1', '/wp_pages/get/id/(?P<ID>[a-zA-Z0-9-]+)', array( 'GG_Database_Manager', 'get_WP_by_ID' ));
+RB_WP_Rest_API_Extended::get('gg/v1', '/wp_pages/get/all', array( 'GG_Database_Manager', 'get_WP_pages' ));
+RB_WP_Rest_API_Extended::get('gg/v1', '/wp_pages/get/tree', array( 'GG_Database_Manager', 'get_WP_pages_tree' ));
+
+// =============================================================================
 // PRODUCTS ROUTES
 // =============================================================================
 RB_WP_Rest_API_Extended::get('gg/v1', '/products/get/all', array( 'GG_Database_Manager', 'get_products' ));

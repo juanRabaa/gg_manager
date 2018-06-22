@@ -18,6 +18,16 @@ function findAndRemove( arr, funct ){
         arr.splice(index, 1);
 }
 
+function sanitizeJSONforHttp(json){
+    var copy = Object.assign({}, json);
+    for(var property in copy){
+        var type = typeof(copy[property]);
+        if (type == 'object' || type == 'function')
+            delete copy[property];
+    }
+    return copy;
+}
+
 if (!Array.prototype.findAndRemove) {
     Array.prototype.findAndRemove = function(funct) {
         var index = false;
