@@ -111,9 +111,7 @@ wordpressPagesManager){
                         var error = result.data.last_error;
                         if ( error )
                             console.log("ERROR SAVING DATA", error);
-                        $scope.updateButtonWordpressPage(button).then(function(result){
-                            savingData.saving = false;
-                        });
+                        savingData.saving = false;
                     });
                 }
                 else {
@@ -214,17 +212,7 @@ wordpressPagesManager){
 
     $scope.generatePageFor = function(page, checkChilds){
         console.log(page.parentPageObject.wpPage);
-        var pageData = {
-            title:  page.name,
-            excerpt: page.description,
-            parent: page.parentPageObject.wpPage.id,
-            status: 'publish',
-            meta: {
-                gg_page_ID: page.ID,
-            },
-        };
-        console.log(pageData);
-        var creationPromise = $scope.wordpressPagesManager.createPage(pageData);
+        var creationPromise = $scope.pagesFactory.generateWordpressPage(page);
         creationPromise.then(function(result){//termina de crearse la pagina
             $scope.pagesFactory.removePageFromLosts(page);
             console.log(result.data);
@@ -273,16 +261,6 @@ wordpressPagesManager){
         $scope.lostPages.filteredPages().forEach(function(page){
             $scope.generatePagesRecursively(page);
         });
-    };
-
-    $scope.updateButtonWordpressPage = function(button){
-        button.wpPage.title = button.name;
-        if(button.visibility == true)
-            button.wpPage.status = "publish";
-        else
-            button.wpPage.status = "draft";
-
-        return $scope.wordpressPagesManager.editPage(button.wpPage);
     };
 
     // =========================================================================
